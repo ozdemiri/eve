@@ -23,5 +23,5 @@ eve('#dvChart').pie({
 });
 ```
 
-###Demos
+###Demos and Documentation
 http://eve.artgratis.com/
