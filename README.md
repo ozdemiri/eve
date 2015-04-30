@@ -1,6 +1,5 @@
 ## EVE Visualization Library
 
-Eve is planned to be a visualization library including **charts**, **diagrams**, **grid** and **pivot table**. 
+![alt tag](https://dl.dropboxusercontent.com/u/36801868/eve.jpg) 
 
-###Pie & Donut Chart
-![alt tag](https://dl.dropboxusercontent.com/u/36801868/evepiedonut.jpg) 
+Eve is planned to be a visualization library including **charts**, **diagrams**, **grid** and **pivot table**. 
