@@ -1,0 +1,19 @@
+{
+  "name": "Eve",
+  "version": "1.0.0",
+  "description": "Eve is a data visualization library including charts, diagrams, data grid and pivot table.",
+  "main": "/scripts/eve.js",
+  "scripts": {
+    "test": "mocha test/*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eveui/eve.git"
+  },
+  "author": "Ismail Ozdemir",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/eveui/eve/issues"
+  },
+  "homepage": "https://github.com/eveui/eve"
+}
