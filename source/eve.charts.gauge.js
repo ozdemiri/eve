@@ -12,23 +12,27 @@
  * Gauge chart class.
  */
 (function (eveCharts) {
-    //gauge chart creator class
+    //gauge creator class
     function gaugeChart(chart) {
         //declare gauge variables
-        var plot = eve.charts.createPlot(chart),
+        var plot = chart.plot,
             serie = chart.series[0],
+            baseValue = serie.value,
             trendHeight = chart.trends.length > 0 ? serie.trendHeight : 0,
             size = Math.min(plot.width - chart.margin.left - chart.margin.right, plot.height - chart.margin.top - chart.margin.bottom),
             percentValue = getPercent(serie.value),
-            minValue = plot.formatNumber(serie.min),
-            maxValue = plot.formatNumber(serie.max),
+            minValue = chart.formatNumber(serie.min),
+            maxValue = chart.formatNumber(serie.max),
             range = serie.max - serie.min,
             majorDelta = range / (serie.majorTicks - 1),
             radius, innerRadius, btx, bty, titleTextSize, handleTextSize, valueTextSize, labelTextSize,
             matchTrend = null,
             gaugeValueHandle = null,
             gaugeValueHandleCircle = null,
-            gaugeValueText = null;
+            gaugeValueText = null,
+            standardGaugeArc = null,
+            standardGaugeInnerArc = null,
+            base = this;
 
         //check serie to handle errors
         if (serie.type !== 'gauge') {
@@ -36,93 +40,42 @@
             return null;
         }
 
-        //append balloon div into the document
-        eve(document.body).append('<div id="' + chart.id + '_balloon" class="eve-balloon"></div>');
+        //create an internal function to get percentage value
+        function getPercent(value) {
+            //declare range and calculate percent
+            var percent = value / range * 100 - (serie.min / range * 100);
 
-        //set balloon as eve object
-        var balloon = eve('#' + chart.id + '_balloon');
+            //return percent
+            return percent;
+        };
 
-        //set balloon style
-        balloon.style('backgroundColor', chart.balloon.backColor);
-        balloon.style('borderStyle', chart.balloon.borderStyle);
-        balloon.style('borderColor', chart.balloon.borderColor);
-        balloon.style('borderRadius', chart.balloon.borderRadius + 'px');
-        balloon.style('borderWidth', chart.balloon.borderSize + 'px');
-        balloon.style('color', chart.balloon.fontColor);
-        balloon.style('fontFamily', chart.balloon.fontFamily);
-        balloon.style('fontSize', chart.balloon.fontSize + 'px');
-        balloon.style('paddingLeft', chart.balloon.padding + 'px');
-        balloon.style('paddingTop', chart.balloon.padding + 'px');
-        balloon.style('paddingRight', chart.balloon.padding + 'px');
-        balloon.style('paddingBottom', chart.balloon.padding + 'px');
-        if (chart.balloon.fontStyle == 'bold') balloon.style('fontWeight', 'bold'); else balloon.style('fontStyle', chart.balloon.fontStyle);
-
-        //set this data
-        this.value = serie.value;
-
-        //calculate radius and text sizes by gauge behavior
-        switch (serie.behavior) {
-            case 'standard':
-                {
-                    //set standard gauge variables
-                    radius = (size - trendHeight) / 2;
-                    innerRadius = serie.innerRadius == 0 ? (radius / 2) : serie.innerRadius;
-                    btx = (plot.width + chart.margin.left + chart.margin.right - trendHeight) / 2;
-                    bty = (plot.height + chart.margin.top + chart.margin.bottom + innerRadius) / 2;
-                    titleTextSize = radius / 4;
-                    handleTextSize = titleTextSize * .5;
-                    labelTextSize = titleTextSize * .4;
-                    valueTextSize = titleTextSize * .9;
-                }
-                break;
-            case 'dial':
-                {
-                    //set dial gauge variables
-                    radius = size / 2;
-                    btx = (plot.width + chart.margin.left + chart.margin.right) / 2;
-                    bty = (plot.height + chart.margin.top + chart.margin.bottom) / 2;
-                    titleTextSize = size / 12;
-                    handleTextSize = size / 20;
-                    labelTextSize = size / 20;
-                    valueTextSize = size / 11;
-                }
-                break;
-        }
-
-        //create arc functions
-        var standardGaugeArc = d3.svg.arc().outerRadius(radius).innerRadius(innerRadius).startAngle(0).endAngle(Math.PI);
-        var standardGaugeInnerArc = d3.svg.arc().outerRadius(radius).innerRadius(innerRadius).startAngle(0).endAngle(function (d) { return d / 100 * Math.PI });
-
-        //get percent value
-        function getPercent(value) { return Math.round((value - serie.min) / serie.max * 100); }
-
-        //Create a tween for arc
+        //create an internal function to handle standard gauge animation
         function standardGaugeTween(b) {
             var interpolated = d3.interpolate(0, b);
             return function (t) {
                 return standardGaugeInnerArc(interpolated(t));
             }
-        }
+        };
 
-        //Converts value to degrees
+        //create an internal function to convert given value to degrees
         function convertToDegrees(val) {
             return val / range * 270 - (serie.min / range * 270 + 45);
-        }
+        };
 
-        //Converts value to radians
+        //create an internal function to convert given value to radians
         function convertToRadians(val) {
             return convertToDegrees(val) * Math.PI / 180;
-        }
+        };
 
-        //Converts value to point
+        //create an internal function to convert given value to point with the given factor
         function convertToPoint(val, factor) {
             return {
                 x: btx - radius * factor * Math.cos(convertToRadians(val)),
                 y: bty - radius * factor * Math.sin(convertToRadians(val))
             };
-        }
+        };
 
-        //Gets needle path
+        //create an internal function to create needle svg path
         function getNeedlePath(val) {
             //Declare variables
             var _delta = range / 13,
@@ -144,56 +97,69 @@
 
             //Return path
             return [_head, _head1, _tail2, _tail, _tail1, _head2, _head];
-        }
-
-        //formats value
-        function formatValue(value, data) {
-            //handle errors
-            if (arguments.length === 0) return '';
-            if (value == null || data == null) return '';
-
-            //declare format variables
-            var formatted = value;
-                
-            //convert value
-            formatted = formatted.replaceAll('{{value}}', plot.formatNumber(data.value));
-
-            //convert percent
-            formatted = formatted.replaceAll('{{percent}}', '%' + data.percent);
-
-            //convert max
-            formatted = formatted.replaceAll('{{max}}', plot.formatNumber(data.max));
-
-            //convert min
-            formatted = formatted.replaceAll('{{min}}', plot.formatNumber(data.min));
-
-            //check whether the data trend is not null
-            if (data.trend != null) {
-                //convert trend title
-                formatted = formatted.replaceAll('{{trendTitle}}', data.trend.title);
-
-                //convert trend start
-                formatted = formatted.replaceAll('{{trendStart}}', plot.formatNumber(data.trend.start));
-
-                //convert trend end
-                formatted = formatted.replaceAll('{{trendEnd}}', plot.formatNumber(data.trend.end));
-            }
-
-            //return formatted content
-            return formatted;
         };
 
-        //set base object
-        var base = this;
+        //create an internal function to init gauge
+        function initGauge() {
+            //re-calculate gauge variables
+            size = Math.min(plot.width - chart.margin.left - chart.margin.right, plot.height - chart.margin.top - chart.margin.bottom);
+            percentValue = getPercent(baseValue);
+            minValue = chart.formatNumber(serie.min);
+            maxValue = chart.formatNumber(serie.max);
+            range = serie.max - serie.min;
+            majorDelta = range / (serie.majorTicks - 1);
 
-        //create canvas
-        var canvas = d3.select(plot.container.reference).append('svg')
-            .attr('width', plot.width).attr('height', plot.height);
+            //calculate radius and text sizes by gauge behavior
+            switch (serie.behavior) {
+                case 'standard':
+                    {
+                        //set standard gauge variables
+                        radius = (size - trendHeight) / 2;
+                        innerRadius = serie.innerRadius == 0 ? (radius / 2) : serie.innerRadius;
+                        btx = (plot.width + chart.margin.left - chart.margin.right - trendHeight) / 2;
+                        bty = (plot.height + chart.margin.top - chart.margin.bottom + innerRadius) / 2;
+                        titleTextSize = radius / 4;
+                        handleTextSize = titleTextSize * .5;
+                        labelTextSize = titleTextSize * .4;
+                        valueTextSize = titleTextSize * .9;
+                    }
+                    break;
+                case 'dial':
+                    {
+                        //set dial gauge variables
+                        radius = size / 2;
+                        btx = (plot.width + chart.margin.left - chart.margin.right) / 2;
+                        bty = (plot.height + chart.margin.top - chart.margin.bottom) / 2;
+                        titleTextSize = size / 12;
+                        handleTextSize = size / 20;
+                        labelTextSize = size / 20;
+                        valueTextSize = size / 11;
+                    }
+                    break;
+            }
 
-        //inits standard gauge
+            //create arc functions
+            standardGaugeArc = d3.svg.arc().outerRadius(radius).innerRadius(innerRadius).startAngle(0).endAngle(Math.PI);
+            standardGaugeInnerArc = d3.svg.arc().outerRadius(radius).innerRadius(innerRadius).startAngle(0).endAngle(function (d) { return d / 100 * Math.PI });
+
+            //switch behavior
+            switch (serie.behavior) {
+                case 'standard':
+                    initStandard();
+                    break;
+                case 'dial':
+                    initDial();
+                    break;
+            }
+
+            //update gauge
+            update(baseValue);
+        }
+
+        //create an internal function to init standard gauge
         function initStandard() {
             //set min handle
-            var minHandle = canvas.append('text')
+            var minHandle = plot.canvas.append('text')
                 .text(minValue)
                 .style('fill', serie.handleFontColor)
                 .style('font-size', handleTextSize + 'px')
@@ -205,7 +171,7 @@
                 .attr('y', function (d) { return bty + this.getBBox().height; });
 
             //set max handle
-            var maxHandle = canvas.append('text')
+            var maxHandle = plot.canvas.append('text')
                 .text(maxValue)
                 .style('fill', serie.handleFontColor)
                 .style('font-size', handleTextSize + 'px')
@@ -217,7 +183,7 @@
                 .attr('y', function (d) { return bty + this.getBBox().height; });
 
             //Create back circle
-            var backCircle = canvas.append('path')
+            var backCircle = plot.canvas.append('path')
                 .attr('transform', 'translate(' + btx + ',' + bty + ')rotate(270)')
                 .style('fill', serie.gaugeBackColor)
                 .style('stroke', serie.gaugeBorderColor)
@@ -232,55 +198,62 @@
                 var trendArc = d3.svg.arc().outerRadius(radius + trendHeight).innerRadius(radius).startAngle(trendStartAngle).endAngle(trendEndAngle);
 
                 //Create trend circle
-                var trendCircle = canvas.append('path')
+                var trendCircle = plot.canvas.append('path')
                     .attr('transform', 'translate(' + btx + ',' + bty + ')rotate(270)')
                     .style('fill', trend.color)
                     .attr('d', trendArc)
                     .on('mousemove', function (d) {
                         //set balloon content
-                        var balloonContent = trend.balloonFormat.replaceAll('{{title}}', trend.title).replaceAll('{{start}}', plot.formatNumber(trend.start))
-                            .replaceAll('{{end}}', plot.formatNumber(trend.end)).replaceAll('{{value}}', plot.formatNumber(base.value)).replaceAll('{{percent}}', percentValue);
+                        var balloonContent = trend.balloonFormat.replaceAll('{{title}}', trend.title).replaceAll('{{start}}', chart.formatNumber(trend.start))
+                            .replaceAll('{{end}}', chart.formatNumber(trend.end)).replaceAll('{{value}}', chart.formatNumber(baseValue)).replaceAll('{{percent}}', percentValue);
 
                         //set balloon border color
-                        balloon.style('borderColor', trend.color);
+                        plot.balloon.style('borderColor', trend.color);
 
                         //show balloon
-                        showBalloon(balloonContent);
+                        chart.showBalloon(balloonContent);
                     })
                     .on('mouseout', function (d) {
                         //hide bubble
-                        hideBalloon();
+                        chart.hideBalloon();
                     });
             });
 
             //create value circle
-            gaugeValueHandle = canvas.append('path')
+            gaugeValueHandle = plot.canvas.append('path')
                 .attr('transform', 'translate(' + btx + ',' + bty + ')rotate(270)')
                 .style('fill', serie.color)
                 .on('mousemove', function (d) {
                     //set balloon content
                     var balloonData = {
-                        value: base.value,
+                        value: baseValue,
                         percent: percentValue,
                         max: serie.max,
                         min: serie.min,
                         trend: matchTrend
                     };
-                    var balloonContent = formatValue(chart.balloon.format, balloonData);
+                    var balloonContent = chart.setBalloonContent({
+                        data: balloonData,
+                        dataIndex: 0,
+                        format: chart.balloon.format,
+                        serie: serie,
+                        type: 'gauge'
+                    });
+                    //formatValue(chart.balloon.format, balloonData);
 
                     //set balloon border color
-                    balloon.style('borderColor', serie.color);
+                    plot.balloon.style('borderColor', serie.color);
 
                     //show balloon
-                    showBalloon(balloonContent);
+                    chart.showBalloon(balloonContent);
                 })
                 .on('mouseout', function (d) {
                     //hide bubble
-                    hideBalloon();
+                    chart.hideBalloon();
                 });;
 
             //create value handle
-            gaugeValueText = canvas.append('text')
+            gaugeValueText = plot.canvas.append('text')
                 .style('fill', serie.handleFontColor)
                 .style('text-anchor', 'middle')
                 .style('font-family', serie.handleFontFamily)
@@ -291,7 +264,7 @@
             //check whether the gauge has label
             if (serie.label.trim() != '') {
                 //set label
-                canvas.append('text').text(serie.label)
+                plot.canvas.append('text').text(serie.label)
                     .style('fill', serie.labelFontColor)
                     .style('font-family', serie.labelFontFamily)
                     .style('text-anchor', 'middle')
@@ -302,14 +275,14 @@
             }
         };
 
-        //inits dial gauge
+        //create an internal function to init dial gauge
         function initDial() {
             //create top circle
-            var topCircle = canvas.append('circle').attr('cx', btx).attr('cy', bty).attr('r', radius)
+            var topCircle = plot.canvas.append('circle').attr('cx', btx).attr('cy', bty).attr('r', radius)
                 .style('fill', serie.gaugeBackColor).style('stroke', serie.gaugeBorderColor).style('stroke-width', serie.gaugeBorderSize + 'px');
 
             //create inner circle
-            var innerCircle = canvas.append('circle').attr('cx', btx).attr('cy', bty).attr('r', radius * 0.9)
+            var innerCircle = plot.canvas.append('circle').attr('cx', btx).attr('cy', bty).attr('r', radius * 0.9)
                 .style('fill', serie.innerBackColor).style('stroke', serie.innerBorderColor).style('stroke-width', serie.innerBorderSize + 'px');
 
             //set trends
@@ -320,24 +293,24 @@
                 var trendArc = d3.svg.arc().outerRadius(radius * 0.88).innerRadius(radius * 0.8).startAngle(trendStartAngle).endAngle(trendEndAngle);
 
                 //Create trend circle
-                var trendCircle = canvas.append('path')
+                var trendCircle = plot.canvas.append('path')
                     .attr('transform', 'translate(' + btx + ',' + bty + ')rotate(270)')
                     .style('fill', trend.color)
                     .attr('d', trendArc)
                     .on('mousemove', function (d) {
                         //set balloon content
-                        var balloonContent = trend.balloonFormat.replaceAll('{{title}}', trend.title).replaceAll('{{start}}', plot.formatNumber(trend.start))
-                            .replaceAll('{{end}}', plot.formatNumber(trend.end)).replaceAll('{{value}}', plot.formatNumber(base.value)).replaceAll('{{percent}}', percentValue);
+                        var balloonContent = trend.balloonFormat.replaceAll('{{title}}', trend.title).replaceAll('{{start}}', chart.formatNumber(trend.start))
+                            .replaceAll('{{end}}', chart.formatNumber(trend.end)).replaceAll('{{value}}', chart.formatNumber(baseValue)).replaceAll('{{percent}}', percentValue);
 
                         //set balloon border color
-                        balloon.style('borderColor', trend.color);
+                        plot.balloon.style('borderColor', trend.color);
 
                         //show balloon
-                        showBalloon(balloonContent);
+                        chart.showBalloon(balloonContent);
                     })
                     .on('mouseout', function (d) {
                         //hide bubble
-                        hideBalloon();
+                        chart.hideBalloon();
                     });
             });
 
@@ -353,7 +326,7 @@
                     var minorPoint2 = convertToPoint(minor, 0.85);
 
                     //append minor point
-                    canvas.append('line')
+                    plot.canvas.append('line')
                         .attr('x1', minorPoint1.x).attr('y1', minorPoint1.y)
                         .attr('x2', minorPoint2.x).attr('y2', minorPoint2.y)
                         .style('stroke', serie.minorTickColor)
@@ -365,7 +338,7 @@
                 var majorPoint2 = convertToPoint(major, 0.85);
 
                 //append major point
-                canvas.append('line')
+                plot.canvas.append('line')
                     .attr('x1', majorPoint1.x).attr('y1', majorPoint1.y)
                     .attr('x2', majorPoint2.x).attr('y2', majorPoint2.y)
                     .style('stroke', serie.majorTickColor)
@@ -377,11 +350,11 @@
                     var handlePoint = convertToPoint(major, 0.63);
 
                     //create handle text
-                    canvas.append('text')
+                    plot.canvas.append('text')
                         .attr('x', handlePoint.x)
                         .attr('y', function (d) { return handlePoint.y + handleTextSize; })
                         .attr('dy', handleTextSize / 3)
-                        .text(plot.formatNumber(major))
+                        .text(chart.formatNumber(major))
                         .attr('text-anchor', major == serie.max ? 'end' : 'start')
                         .style('fill', serie.handleFontColor)
                         .style('font-family', serie.handleFontFamily)
@@ -396,7 +369,7 @@
                 needleLine = d3.svg.line().x(function (d) { return d.x; }).y(function (d) { return d.y; }).interpolate('basis');
 
             //set gauge handle
-            gaugeValueHandle = canvas.append('g').selectAll('path')
+            gaugeValueHandle = plot.canvas.append('g').selectAll('path')
                 .data([needlePath]).enter().append('svg:path')
                 .attr('d', needleLine)
                 .style('fill', serie.handleColor)
@@ -406,34 +379,40 @@
                 .on('mousemove', function (d) {
                     //set balloon content
                     var balloonData = {
-                        value: base.value,
+                        value: baseValue,
                         percent: percentValue,
                         max: serie.max,
                         min: serie.min,
                         trend: matchTrend
                     };
-                    var balloonContent = formatValue(chart.balloon.format, balloonData);
+                    var balloonContent = chart.setBalloonContent({
+                        data: balloonData,
+                        dataIndex: 0,
+                        format: chart.balloon.format,
+                        serie: serie,
+                        type: 'gauge'
+                    });
 
                     //set balloon border color
-                    balloon.style('borderColor', serie.handleColor);
+                    plot.balloon.style('borderColor', serie.handleColor);
 
                     //show balloon
-                    showBalloon(balloonContent);
+                    chart.showBalloon(balloonContent);
                 })
                 .on('mouseout', function (d) {
                     //hide bubble
-                    hideBalloon();
+                    chart.hideBalloon();
                 });;
 
             //create needle circle
-            canvas.append('circle')
+            plot.canvas.append('circle')
                 .attr('cx', btx).attr('cy', bty)
                 .attr('r', serie.handleCircleSize > radius ? 10 : serie.handleCircleSize)
                 .style('fill', serie.handleCircleColor)
                 .style('stroke', serie.handleCircleBorderColor);
 
             //create value handle
-            gaugeValueText = canvas.append('text')
+            gaugeValueText = plot.canvas.append('text')
                 .style('fill', serie.handleFontColor)
                 .style('text-anchor', 'middle')
                 .style('font-family', serie.handleFontFamily)
@@ -444,7 +423,7 @@
             //check whether the gauge has label
             if (serie.label.trim() != '') {
                 //set label
-                canvas.append('text').text(serie.label)
+                plot.canvas.append('text').text(serie.label)
                     .style('fill', serie.labelFontColor)
                     .style('font-family', serie.labelFontFamily)
                     .style('text-anchor', 'middle')
@@ -456,44 +435,19 @@
             }
         };
 
-        //hides balloon
-        function hideBalloon() {
+        //expose update method
+        function update(value) {
             /// <summary>
-            /// Hides balloon.
+            /// Updates chart data.
             /// </summary>
-            balloon.style('display', 'none');
-        };
+            /// <param name="value"></param>
+            /// <returns type=""></returns>
 
-        //shows balloon
-        function showBalloon(content) {
-            /// <summary>
-            /// Shows balloon with given content.
-            /// </summary>
-            /// <param name="content"></param>
-            /// <param name="data"></param>
-
-            //check whether the arguments
-            if (content == null) hideBalloon();
-
-            //check whther the balloon enabled
-            if (!chart.balloon.enabled) hideBalloon();
-
-            //set balloon content
-            balloon.html(content);
-
-            //set balloon postion and show
-            balloon.style('left', (parseInt(d3.event.pageX) + 5) + 'px');
-            balloon.style('top', (parseInt(d3.event.pageY) + 5) + 'px');
-            balloon.style('display', 'block');
-        };
-
-        //update
-        this.update = function (value) {
             //check whether the value is null
             if (value == null) return null;
 
             //set this value
-            this.value = value;
+            baseValue = value;
 
             //set percent value
             percentValue = getPercent(value);
@@ -501,7 +455,7 @@
             //Iterate all trends
             chart.trends.each(function (trend) {
                 //check value is in trend range
-                if (base.value >= trend.start && base.value <= trend.end)
+                if (baseValue >= trend.start && baseValue <= trend.end)
                     matchTrend = trend;
             });
 
@@ -516,7 +470,7 @@
                             });
 
                         //set value
-                        gaugeValueText.text(plot.formatNumber(value))
+                        gaugeValueText.text(chart.formatNumber(value))
                             .attr('x', (plot.width + trendHeight) / 2)
                             .attr('y', bty);
                     }
@@ -530,9 +484,9 @@
                                 var needleValue = value;
 
                                 //check range
-                                if (base.value > serie.max)
+                                if (baseValue > serie.max)
                                     needleValue = serie.max + 0.02 * range;
-                                else if (base.value < serie.min)
+                                else if (baseValue < serie.min)
                                     needleValue = serie.min - 0.02 * range;
 
                                 //set target position
@@ -553,7 +507,7 @@
                             });
 
                         //set value
-                        gaugeValueText.text(plot.formatNumber(value))
+                        gaugeValueText.text(chart.formatNumber(value))
                             .attr('x', function (d) { return btx; })
                             .attr('y', function (d) { return bty + (radius * 0.12) + this.getBBox().height + valueTextSize / 2; });
                     }
@@ -561,19 +515,13 @@
             }
         };
 
-        //switch behavior
-        switch (serie.behavior) {
-            case 'standard':
-                initStandard();
-                break;
-            case 'dial':
-                initDial();
-                break;
-        }
+        //init gauge
+        initGauge(baseValue);
 
-        //update gauge
-        this.update(serie.value);
+        //return chart
+        return chart;
     };
+
 
     //set eve charts create gauge chart method
     eveCharts.gauge = function (options) {
@@ -585,8 +533,16 @@
 
         //check whether the chart configurator is not null
         if (this.configurator) {
+            //handle series in options
+            if (options['series'] !== null) {
+                //iterate all series
+                options.series.each(function (serie) {
+                    serie.type = 'gauge';
+                });
+            }
+
             //create chart object
-            var gauge = new gaugeChart(new this.configurator(options));
+            var gauge = gaugeChart(new this.configurator(options));
 
             //add chart instance
             if (gauge !== null)

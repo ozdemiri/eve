@@ -60,12 +60,15 @@ function rearrangeMenu() {
     }
 };
 
-//Activates menu
-function activeMenu(menuID) {
-    /// <summary>
-    /// Activates given menu item.
-    /// </summary>
-    /// <param name="menuID"></param>
+//set active menu on click
+$('#side-menu li').click(function () {
     $('#side-menu li').removeClass('active');
-    $('#' + menuID).addClass('active');
-}
+    $(this).addClass('active');
+});
+
+//set navigator affix
+$('#eveNav').affix({
+    offset: {
+        top: 0
+    }
+});

@@ -85,10 +85,6 @@
     //Gets browser information.
     eve.browser = {
         isIE: false || !!document.documentMode,
-        isOpera: !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0,
-        isSafari: Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0,
-        isFirefox: typeof InstallTrigger !== 'undefined',
-        isChrome: !!window.chrome && !eve.browser.isOpera,
         timeZone: new Date().getTimezoneOffset() * -1 / 60,
         supportsLocalStorage: 'localStorage' in window && window['localStorage'] !== null,
         supportsSessionStorage: 'sessionStorage' in window && window['sessionStorage'] !== null
@@ -194,7 +190,7 @@
         if (eve.getType(obj) === 'array') {
             //Clone array object
             var _arr = [];
-            arr.each(function (item, index) {
+            obj.each(function (item, index) {
                 _arr.push(eve.clone(item));
             });
             return _arr;
@@ -411,12 +407,15 @@
     };
 
     //Converts given dataString to blob.
-    eve.toBlob = function (datastring) {
+    eve.toBlob = function (datastring, type) {
         /// <summary>
         /// Converts given datastring into the blob.
         /// </summary>
         /// <param name="string"></param>
         /// <returns type="Blob"></returns>
+
+        //check whether the type is null
+        if (type == null) type = 'png';
 
         //Declare variables
         var header_end = datastring.indexOf(',') + 1,
@@ -427,12 +426,31 @@
         if (header.indexOf('base64') === -1) return null;
 
         //Convert the given string to a binary array
-        data = pagos.toBinaryArray(datastring.substring(header_end));
+        data = eve.toBinaryArray(datastring.substring(header_end));
 
-        //REturn the binary array as blob
-        return new Blob([data], {
-            type: 'application/pdf'
-        });
+        //switch blob type
+        switch (type) {
+            case 'png':
+                return new Blob([data], {
+                    type: 'image/png'
+                });
+            case 'jpg':
+                return new Blob([data], {
+                    type: 'image/jpg'
+                });
+            case 'gif':
+                return new Blob([data], {
+                    type: 'image/gif'
+                });
+            case 'pdf':
+                return new Blob([data], {
+                    type: 'application/pdf'
+                });
+            default:
+                return new Blob([data], {
+                    type: 'image/png'
+                });
+        }
     };
 
     //Converts given value into hex.
@@ -539,7 +557,7 @@
         /// </summary>
         /// <param name="data"></param>
         /// <param name="field"></param>
-        
+
         //check whether the arguments is not empty
         if (arguments.length < 2) { throw new Error('Data and fieldName can not be found in arguments!'); return null; };
 
@@ -1233,10 +1251,8 @@
             }
 
             //set options
-            options['type'] = 'pie';
             options['container'] = this;
-            options.series[0]['type'] = 'pie';
-
+            
             //return pie chart
             return eve.charts.pie(options);
         },
@@ -1340,7 +1356,7 @@
             //set options
             options['container'] = this;
             options['type'] = 'line';
-            
+
             //return line chart
             return eve.charts.line(options);
         },
