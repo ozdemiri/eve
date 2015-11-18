@@ -1,5 +1,5 @@
 {
-  "name": "eve",
+  "name": "evecharts",
   "version": "1.0.0",
   "description": "A simple visualization library including charts and diagrams.",
   "main": "eve.js",
