@@ -1,0 +1,23 @@
+{
+    "days": [
+        "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
+    ],
+    "daysMin": [
+        "sun", "mon", "tue", "wed", "thu", "fri", "sat"
+    ],
+    "months": [
+        "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"
+    ],
+    "monthsMin": [
+        "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"
+    ],
+    "min": "min",
+    "max": "max",
+    "sum": "sum",
+    "avg": "avg",
+    "count": "count",
+    "total": "total",
+    "dateFormat": "%m/%d/%y",
+    "numberFormat": ",.2f",
+    "currencySign": "$"
+}

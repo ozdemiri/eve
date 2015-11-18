@@ -1,6 +1,6 @@
-![alt tag](https://dl.dropboxusercontent.com/u/36801868/eve.jpg) 
+![alt tag](https://dl.dropboxusercontent.com/u/36801868/eve.jpg)
 
-Eve is a visualization library including **charts**, **diagrams**, **grid** and **pivot table**. 
+Eve is a simple visualization library including **charts** and **diagrams**.
 
 ###Basic Usage
 ####HTML
@@ -9,10 +9,10 @@ Eve is a visualization library including **charts**, **diagrams**, **grid** and 
 ```
 ####JavaScript
 ```javascript
-eve('#dvChart').pie({
+eve.pie({
   data: jsonData,
   balloon: {
-    format: '<b>{{title}}</b>: {{value}}'
+    format: '<b>{title}</b>: {value}'
   },
   series: [
     {
