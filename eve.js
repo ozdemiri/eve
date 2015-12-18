@@ -11,20 +11,32 @@
  * DEFINITION
  * EVE Chart library classes.
  */
-(function() {
+ (function() {
     //declare eve method
     var eve = {
-        isIE: false || !!document.documentMode,
         colors: ['#83AA30', '#1499D3', '#4D6684', '#3D3D3D', '#B9340B', '#CEA45C', '#C5BE8B', '#498379', '#3F261C', '#E74700', '#F1E68F', '#FF976F', '#FF6464', '#554939', '#706C4D']
     };
 
     //loads localization settings
     eve.setLocale = function(locale) {
+        //set locale path
+        var localePath = 'locales/' + locale + '.json';
+
+        //check if directly localization name used
+        if(locale.indexOf('.json') == -1)
+            localePath = locale;
+
         //set eve localizaiton
-        d3.json('locales/' + locale + '.json', function() {
+        d3.json(localePath, function() {
             //set eve locale
             eve.consts = arguments[1];
         })
+    };
+
+    //sets eve charts colors
+    eve.setColors = function(colors) {
+        //set colors
+        eve.colors = colors;
     };
 
     //gets object type
@@ -241,7 +253,7 @@
     };
 
     //set default locale
-    eve.setLocale('en');
+    //eve.setLocale('en');
 
     //adds replaceall function to the string object.
     String.prototype.replaceAll = function (term, replacement) {
@@ -287,7 +299,6 @@
     }
 
 }).call(this);
-
 (function(e) {
     //default chart properties
     var defaults = {
@@ -409,7 +420,7 @@
 
         //clear element content
         element.innerHTML = '';
-
+        
         //get element parent node
         parent = element.parentNode;
         offset = e.offset(parent);
@@ -603,7 +614,7 @@
             }
 
             //replace x value
-            if(xValue) {
+            if(xValue != null) {
                 if(e.getType(xValue) === 'date') {
                     content = content.replaceAll('{x}', dateFormatter(xValue));
                     content = content.replaceAll('{title}', dateFormatter(xValue));
@@ -617,13 +628,13 @@
             }
 
             //replace y value
-            if(yValue) {
+            if (!isNaN(parseFloat(yValue))) {
                 content = content.replaceAll('{y}', formatter(yValue));
                 content = content.replaceAll('{value}', formatter(yValue));
             }
 
             //replace size value
-            if(sizeValue)
+            if (!isNaN(parseFloat(sizeValue)))
                 content = content.replaceAll('{size}', formatter(sizeValue));
 
             //replace serie
@@ -642,7 +653,6 @@
     };
 
 })(eve);
-
 (function(e) {
     //axis class
     function axis(chart) {
@@ -658,10 +668,12 @@
         this.yAxis = null;
         this.series = null;
         this.serieNames = [];
+        this.xAxisDataType = 'numeric';
 
         //declare variables
         var that = this,
             xAxis, yAxis,
+            xAxisGrid, yAxisGrid,
             legendWidth = 0,
             isReversed = chart.type === 'bar',
             legendHeight = chart.series.length * (chart.legend.fontSize + 5),
@@ -676,6 +688,9 @@
         //set x Data Type as string if chart type is bar or column
         if(chart.type === 'bar' || chart.type === 'column')
             xDataType = 'string';
+        
+        //set x data type
+        this.xAxisDataType = xDataType;
 
         //decrease axis left and width if y axis title enabled
         axisLeft += chart.yAxis.titleFontSize;
@@ -693,7 +708,8 @@
 
         //map series with data
         that.series = that.serieNames.map(function(name, index) {
-            return {
+            //set data object
+            var dataObject = {
                 name: name,
                 serieType: chart.series[index].type,
                 values: chart.data.map(function(d) {
@@ -710,16 +726,19 @@
 
                     //set y value if set
                     if (serie.yField && e.getType(serie.yField) === 'string' && serie.yField !== '')
-                        dataObject.yValue = +parseFloat(d[name]);
+                        dataObject.yValue = parseFloat(d[name]);
 
                     //check whether the serie has size field
                     if (serie.sizeField && e.getType(serie.sizeField) === 'string' && serie.sizeField !== '')
-                        dataObject.sizeValue = +parseFloat(d[serie.sizeField]);
+                        dataObject.sizeValue = parseFloat(d[serie.sizeField]);
 
                     //return data object
                     return dataObject;
                 })
-            };
+            }
+
+            //return data object
+            return dataObject;
         });
 
         //create serie min
@@ -735,9 +754,29 @@
                 return parseFloat(v.yValue);
             });
         });
-
+        
+        //check chart type to set serie max
+        if (chart.type === 'area') {
+            //set max serie value
+            serieMax = d3.sum(that.series, function (c) {
+                return d3.max(c.values, function (v) {
+                    return parseFloat(v.yValue);
+                });
+            });
+        } else if (chart.type === 'bar' || chart.type === 'column') {
+            //check if axis is stacked
+            if (chart.yAxis.stacked) {
+                //set max serie value
+                serieMax = d3.sum(that.series, function (c) {
+                    return d3.max(c.values, function (v) {
+                        return parseFloat(v.yValue);
+                    });
+                });
+            }
+        }
+        
         //increase serie max by 10 percent
-        serieMax *= 1.1;
+        serieMax *= 1.25;
 
         //set serie min
         serieMin = chart.yAxis.startsFromZero ? 0 : serieMin;
@@ -766,15 +805,29 @@
             }
 
             //set y domains
-            yDomains.push(serieMin);
+            yDomains.push(0);
             yDomains.push(serieMax);
         });
 
         //get max text value
-        var maxValue = maxValues.max(),
+        var maxValue = d3.max(maxValues),
             minValue = minValues.min(),
             symbolSize = Math.pow(chart.legend.fontSize, 2);
-            maxValueLength = (maxValue.toString().length * chart.yAxis.labelFontSize / 2);
+        
+        //check chart type to set serie max
+        if (chart.type === 'area') {
+            //set max value
+            maxValue = d3.sum(maxValues);
+        } else if (chart.type === 'bar' || chart.type === 'column') {
+            //check if axis is stacked
+            if (chart.yAxis.stacked) {
+                //set max value
+                maxValue = d3.sum(maxValues);
+            }
+        }
+
+        //decllare max value length
+        var maxValueLength = (maxValue.toString().length * chart.yAxis.labelFontSize / 2);
 
         //check if reversed to set max val length
         if(isReversed) {
@@ -1292,16 +1345,19 @@
                     break;
                 case 'string':
                     {
+                        //declare domain array
+                        var domainArray = chart.data.map(function (d) {
+                            return d[chart.xField].toString();
+                        });
+                        
+                        //sort domain array
+                        domainArray.sort();
+
                         //create x axis domain
-                        if(isReversed) {
-                            that.y.domain(chart.data.map(function(d) {
-                                return d[chart.xField].toString();
-                            }));
-                        } else {
-                            that.x.domain(chart.data.map(function(d) {
-                                return d[chart.xField].toString();
-                            }));
-                        }
+                        if (isReversed)
+                            that.y.domain(domainArray);
+                        else
+                            that.x.domain(domainArray);
                     }
                     break;
                 default:
@@ -1326,22 +1382,28 @@
                 that.y.domain(yDomains);
 
             //create x axis grid lines
-            chart.svg.append('g')
+            xAxisGrid = chart.svg.append('g')
                 .attr('class', 'eve-x-grid')
                 .attr('transform', function () { return 'translate(' + axisLeft + ', ' + axisHeight + ')'; })
-                .style('stroke-opacity', chart.xAxis.gridLineAlpha)
-                .style('stroke-width', chart.xAxis.gridLineThickness)
-                .style('stroke', chart.xAxis.gridLineColor)
                 .call(createXAxis().tickSize(-axisHeight, 0, 0).tickFormat(''));
-
+            
+            //set x axis grid line style
+            xAxisGrid.selectAll('line')
+                .style('stroke-opacity', chart.xAxis.gridLineAlpha)
+                .style('stroke-width', chart.xAxis.gridLineThickness + 'px')
+                .style('stroke', chart.xAxis.gridLineColor);
+            
             //create y axis grid lines
-            chart.svg.append('g')
+            yAxisGrid = chart.svg.append('g')
                 .attr('class', 'eve-y-grid')
                 .attr('transform', function () { return 'translate(' + axisLeft + ')'; })
-                .style('stroke-opacity', chart.yAxis.gridLineAlpha)
-                .style('stroke-width', chart.yAxis.gridLineThickness)
-                .style('stroke', chart.yAxis.gridLineColor)
                 .call(createYAxis().tickSize(-axisWidth, 0, 0).tickFormat(''));
+            
+            //set y axis grid line style
+            yAxisGrid.selectAll('line')
+                .style('stroke-opacity', chart.yAxis.gridLineAlpha)
+                .style('stroke-width', chart.yAxis.gridLineThickness + 'px')
+                .style('stroke', chart.yAxis.gridLineColor);
 
             //create y axis
             yAxis = chart.svg.append('g')
@@ -1716,664 +1778,6 @@
         return new axis(chart);
     };
 })(eve);
-
-(function(e) {
-    //define default options
-    var defaults = {
-        alpha: .7,
-        bullet: 'none',
-        bulletAlpha: .5,
-        bulletColor: '',
-        bulletSize: 8,
-        bulletStrokeSize: 1,
-        bulletStrokeAlpha: 1,
-        color: '',
-        dateFormat: '',
-        labelFontColor: '#ffffff',
-        labelFontFamily: 'Tahoma',
-        labelFontSize: 11,
-        labelFontStyle: 'normal',
-        labelFormat: '',
-        numberFormat: '',
-        title: '',
-        type: 'area',
-        yField: ''
-    };
-
-    //area chart class
-    function area(options) {
-        //check whether the options has series
-        if(options.series == null && e.getType(options.series) !== 'array') {
-            throw new Error('Invalid chart series!');
-        }
-
-        //iterate all series in options to extend them
-        for(var i=0; i<options.series.length; i++) {
-            //extend current serie with defaults
-            e.extend(options.series[i], defaults);
-        }
-
-        //create chart
-        var that = this,
-            chart = e.charts.init(options),
-            axis = e.charts.createAxis(chart),
-            areaSeries, bulletSeries,
-            areaF, bulletF, stackF;
-
-        //handles zoom
-        var zoom = d3.behavior.zoom().x(axis.x).y(axis.y).on("zoom", zoomHandler);
-        function zoomHandler() {
-            //re-draw axes
-            chart.svg.select('.eve-x-axis').call(axis.xAxis);
-            chart.svg.select('.eve-y-axis').call(axis.yAxis);
-
-            //re-create x axis grid
-			chart.svg.select(".eve-x-grid")
-				.call(
-                    axis.makeXAxis()
-	                .tickSize(-axis.offset.height, 0, 0)
-                );
-
-            //re-create y axis grid
-			chart.svg.select(".eve-y-grid")
-				.call(
-                    axis.makeYAxis()
-				    .tickSize(-axis.offset.width, 0, 0)
-                );
-        }
-
-        //attach zoomer
-        if(chart.zoomable)
-            chart.svg.call(zoom);
-
-        //initializes area chart
-        function init() {
-            //create stack function
-            stackF = d3.layout.stack()
-                .values(function(d) { return d.values; })
-                .x(function(d) { return axis.x(d.xValue); })
-                .y(function(d) { return axis.y(d.yValue); });
-
-            //stack series
-            stackF(axis.series);
-
-            //update axis domain
-            axis.y.domain([
-                0,
-                d3.max(axis.series, function (d) {
-                    return d3.max(d.values, function (d2) { return d2.y0 + d2.y; });
-                })
-            ]);
-
-            //create area function
-            areaF = d3.svg.area()
-                .x(function(d) { return axis.x(d.xValue); })
-                .y0(function(d) { return axis.y(d.y0); })
-                .y1(function(d) { return axis.y(d.y0 + d.y); });
-
-            //create bullet function
-            bulletF = d3.svg.symbol().type(function (d) {
-                return chart.series[d.index].bullet === 'none' ? 'circle' : chart.series[d.index].bullet;
-            }).size(function (d) {
-                return Math.pow(chart.series[d.index].bulletSize, 2);
-            });
-
-            //set default balloon format
-            if(chart.balloon.format === '')
-                chart.balloon.format = '{x}: {y}';
-
-            //create area series
-            areaSeries = chart.svg.selectAll('.eve-series')
-                .data(axis.series)
-                .enter().append('g')
-                .attr('class', 'eve-series');
-
-            //append area paths
-            areaSeries.append('path')
-                .attr('class', function (d, i) { return 'eve-area-serie eve-area-serie-' + i; })
-                .attr('d', function (d, i) {
-                    //return line function
-                    return areaF(d.values);
-                })
-                .attr('transform', 'translate(' + axis.offset.left + ')')
-                .style('fill', function (d, i) {
-                    //check whether the serie has color
-                    if (chart.series[i].color === '')
-                        return i <= e.colors.length ? e.colors[i] : e.randColor();
-                    else
-                        return chart.series[i].color;
-                })
-                .style('fill-opacity', function (d, i) { return chart.series[i].alpha; })
-                .style('stroke-width', 1.5)
-                .style('stroke-opacity', 1)
-                .style('stroke', function (d, i) {
-                    //check whether the serie has color
-                    if (chart.series[i].color === '')
-                        return i <= e.colors.length ? e.colors[i] : e.randColor();
-                    else
-                        return chart.series[i].color;
-                });
-
-            //append serie points
-            bulletSeries = areaSeries.selectAll('.eve-area-points')
-                .data(axis.series)
-                .enter().append('g')
-                .attr('class', 'eve-area-points');
-
-            //set points
-            bulletSeries.selectAll('.eve-area-point')
-                .data(function (d) { return d.values; })
-                .enter().append('path')
-                .attr('class', function (d, i) { return 'eve-area-point eve-are-point-' + d.index; })
-                .attr('d', bulletF)
-                .style('cursor', 'pointer')
-                .style('fill', function (d) {
-                    return '#ffffff';
-                })
-                .style('stroke', function (d) {
-                    //check whether the serie has color
-                    if (chart.series[d.index].color === '')
-                        return d.index <= e.colors.length ? e.colors[d.index] : e.randColor();
-                    else
-                        return chart.series[d.index].color;
-                })
-                .style('stroke-width', function (d) { return chart.series[d.index].bulletStrokeSize + 'px'; })
-                .style('stroke-opacity', 0)
-                .style('fill-opacity', 0)
-                .attr('transform', function (d) {
-                    return 'translate(' + (axis.x(d.xValue) + axis.offset.left) + ',' + axis.y(d.y0 + d.y) + ')';
-                })
-                .on('mousemove', function(d, i) {
-                    var balloonContent = chart.getXYFormat(d, chart.series[d.index]);
-
-                    //show balloon
-                    chart.showBalloon(balloonContent);
-
-                    //increase bullet stroke size
-                    d3.select(this)
-                        .style('stroke-opacity', function (d) { return chart.series[d.index].bulletStrokeAlpha; })
-                        .style('fill-opacity', function (d) { return chart.series[d.index].bulletAlpha; });
-                })
-                .on('mouseout', function(d, i) {
-                    //hide balloon
-                    chart.hideBalloon();
-
-                    //increase bullet stroke size
-                    d3.select(this)
-                        .style('stroke-opacity', 0)
-                        .style('fill-opacity', 0);
-                })
-        }
-
-        //init area
-        init();
-
-        //return chart object
-        return chart;
-    }
-
-    //attach area method into eve
-    e.areaChart = function(options) {
-        //set chart type
-        options.type = 'area';
-
-        return new area(options);
-    };
-})(eve);
-
-(function(e) {
-    //define default options
-    var defaults = {
-        alpha: 1,
-        color: '',
-        dateFormat: '',
-        labelFontColor: '#ffffff',
-        labelFontFamily: 'Tahoma',
-        labelFontSize: 11,
-        labelFontStyle: 'normal',
-        labelFormat: '',
-        numberFormat: '',
-        strokeSize: 1,
-        title: '',
-        type: 'bar',
-        yField: ''
-    };
-
-    //bar chart class
-    function bar(options) {
-        //check whether the options has series
-        if(options.series == null && e.getType(options.series) !== 'array') {
-            throw new Error('Invalid chart series!');
-        }
-
-        //iterate all series in options to extend them
-        for(var i=0; i<options.series.length; i++) {
-            //extend current serie with defaults
-            e.extend(options.series[i], defaults);
-        }
-
-        //create chart
-        var that = this,
-            chart = e.charts.init(options),
-            isReversed = chart.type === 'bar',
-            axis = e.charts.createAxis(chart),
-            barPadding = 25,
-            groupAxis, stackedBars, stackedBarsRects, groupedBars, groupedBarsRects;
-
-        //initializes bar chart
-        function init() {
-            //set default balloon format
-            if(chart.balloon.format === '')
-                chart.balloon.format = '{x}: {y}';
-
-            //initialize bar chart via stack state
-            if(chart.yAxis.stacked) {
-                //create stacked bar chart
-                createStackedBars();
-            } else {
-                //set range band
-                var rangeBand = chart.type === 'bar' ? axis.y.rangeBand() : axis.x.rangeBand();
-
-                //set group axis
-                groupAxis = d3.scale.ordinal().domain(axis.serieNames).rangeRoundBands([0, rangeBand]);
-
-                //create grouped bar chart
-                createGroupedBars();
-            }
-        }
-
-        //creates stacked bar chart
-        function createStackedBars() {
-            //manipulate chart data
-            chart.data.forEach(function(d) {
-                //set first y value
-                var y0 = 0;
-
-                //set series
-                d.values = axis.serieNames.map(function(name) {
-                    //set value object
-                    var dataObj = {
-                        name: 'name',
-                        xValue: d[chart.xField],
-                        yValue: +d[name],
-                        y0: y0,
-                        y1: y0 += +d[name]
-                    };
-
-                    //return data object
-                    return dataObj;
-                });
-
-                //set serie total
-                d.total = d.values[d.values.length - 1].y1;
-            });
-
-            //sort chart data
-            chart.data.sort(function(a, b) { return b.total - a.total; });
-
-            //check whether the axis is reversed
-            if (isReversed)
-                axis.x.domain([0, d3.max(chart.data, function (d) { return d.total; })]);
-            else
-                axis.y.domain([0, d3.max(chart.data, function (d) { return d.total; })]);
-
-            //check whether the chart is reversed
-            if (isReversed) {
-                //update x axis
-                chart.svg.select('.eve-x-axis')
-                    .call(axis.xAxis)
-                    .selectAll('text')
-                    .style('fill', chart.xAxis.labelFontColor)
-                    .style('font-size', chart.xAxis.labelFontSize + 'px')
-                    .style('font-family', chart.xAxis.labelFontFamily)
-                    .style('font-style', chart.xAxis.labelFontStyle === 'bold' ? 'normal' : chart.yAxis.labelFontStyle)
-                    .style('font-weight', chart.xAxis.labelFontStyle === 'bold' ? 'bold' : 'normal')
-                    .style('stroke-width', '0px');
-            } else {
-                //update y axis
-                chart.svg.select('.eve-y-axis')
-                    .call(axis.yAxis)
-                    .selectAll('text')
-                    .style('fill', chart.yAxis.labelFontColor)
-                    .style('font-size', chart.yAxis.labelFontSize + 'px')
-                    .style('font-family', chart.yAxis.labelFontFamily)
-                    .style('font-style', chart.yAxis.labelFontStyle === 'bold' ? 'normal' : chart.yAxis.labelFontStyle)
-                    .style('font-weight', chart.yAxis.labelFontStyle === 'bold' ? 'bold' : 'normal')
-                    .style('stroke-width', '0px');
-            }
-
-            //create stack bars on canvas
-            stackedBars = chart.svg.selectAll('.eve-series')
-                .data(chart.data)
-                .enter().append('g')
-                .attr('class', 'eve-series')
-                .attr('transform', function (d) {
-                    //check whether the chart is reversed
-                    if (isReversed) {
-                        return 'translate(' + axis.offset.left + ',' + (axis.y(d[chart.xField])) + ')';
-                    } else {
-                        return 'translate(' + (axis.x(d[chart.xField]) + axis.offset.left) + ',0)';
-                    }
-                });
-
-            //create stacked bar rectangles
-            stackedBarsRects = stackedBars.selectAll('rect')
-                .data(function (d) { return d.values; })
-                .enter().append('rect')
-                .attr('class', function (d, i) { return 'eve-bar-serie eve-bar-serie-' + i; })
-                .attr('width', function (d) { return isReversed ? (axis.x(d.y1) - axis.x(d.y0)) : axis.x.rangeBand(); })
-                .attr('height', function (d) { return isReversed ? axis.y.rangeBand() : (axis.y(d.y0) - axis.y(d.y1)); })
-                .style('fill', function (d, i) {
-                    //check whether the serie has color
-                    if (chart.series[i].color === '')
-                        return i <= e.colors.length ? e.colors[i] : e.randColor();
-                    else
-                        return chart.series[i].color;
-                })
-                .style('stroke', function (d, i) {
-                    //check whether the serie has color
-                    if (chart.series[i].color === '')
-                        return i <= e.colors.length ? e.colors[i] : e.randColor();
-                    else
-                        return chart.series[i].color;
-                })
-                .style('stroke-width', function (d, i) { return chart.series[i].strokeSize + 'px'; })
-                .style('stroke-opacity', function (d, i) { return chart.series[i].alpha; })
-                .style('fill-opacity', function (d, i) { return chart.series[i].alpha; })
-                .on('mousemove', function(d, i) {
-                    var balloonContent = chart.getXYFormat(d, chart.series[d.index]);
-
-                    //show balloon
-                    chart.showBalloon(balloonContent);
-
-                    //increase bullet stroke size
-                    d3.select(this)
-                        .style('stroke-width', function (d) { return chart.series[i].strokeSize + 1; });
-                })
-                .on('mouseout', function(d, i) {
-                    //hide balloon
-                    chart.hideBalloon();
-
-                    //increase bullet stroke size
-                    d3.select(this)
-                        .style('stroke-width', function (d) { return chart.series[i].strokeSize; });
-                });
-
-            //check whether the chart is reversed
-            if (isReversed)
-                stackedBarsRects.attr('x', function (d) { return axis.x(d.y0); });
-            else
-                stackedBarsRects.attr('y', function (d) { return axis.y(d.y1); });
-        }
-
-        //creates grouped bar chart
-        function createGroupedBars() {
-            //set all values by series
-            chart.data.forEach(function (d) {
-                d.values = axis.serieNames.map(function (name) {
-                    return {
-                        name: name,
-                        xValue: d[chart.xField],
-                        yValue: +d[name]
-                    };
-                })
-            });
-
-            //get new y domain
-            var newYDomain = [0, d3.max(chart.data, function (d) {
-                return d3.max(d.values, function (v) {
-                    return v.yValue * 1.1;
-                });
-            })];
-
-            //check whether the chart is reversed
-            if (isReversed) {
-                //set new domain
-                newYDomain = [d3.max(chart.data, function (d) {
-                    return d3.max(d.values, function (v) {
-                        return v.yValue * 1.1;
-                    });
-                }), 0];
-
-                //update x axis
-                axis.x.domain(newYDomain);
-            } else {
-                //update y axis
-                axis.y.domain(newYDomain);
-            }
-
-            //get range band
-            var rangeBand = groupAxis.rangeBand();
-
-            //create bar groups on canvas
-            groupedBars = chart.svg.selectAll('.eve-series')
-                .data(chart.data)
-                .enter().append('g')
-                .attr('class', 'eve-series')
-                .attr('transform', function (d) {
-                    if (isReversed)
-                        return 'translate(' + (axis.offset.left) + ',' + (axis.y(d[chart.xField])) + ')';
-                    else
-                        return 'translate(' + (axis.x(d[chart.xField]) + axis.offset.left) + ',0)';
-                });
-
-            //create bar group rectangles
-            groupedBarsRects = groupedBars.selectAll('rect')
-                .data(function (d) { return d.values; })
-                .enter().append('rect')
-                .attr('class', function (d, i) { return 'eve-bar-serie eve-bar-serie-' + i; })
-                .attr('width', function (d) { return isReversed ? (axis.offset.width - axis.x(d.yValue)) : rangeBand; })
-                .attr('x', function (d) { return isReversed ? 0 : groupAxis(d.name); })
-                .attr('y', function (d) { return isReversed ? groupAxis(d.name) : axis.y(d.yValue); })
-                .attr('height', function (d) { return isReversed ? rangeBand : (axis.offset.height - axis.y(d.yValue)); })
-                .style('fill', function (d, i) {
-                    //check whether the serie has color
-                    if (chart.series[i].color === '')
-                        return i <= e.colors.length ? e.colors[i] : e.randColor();
-                    else
-                        return chart.series[i].color;
-                })
-                .style('stroke', '#ffffff')
-                .style('stroke-width', function (d, i) { return chart.series[i].strokeSize + 'px'; })
-                .style('stroke-opacity', function (d, i) { return chart.series[i].alpha; })
-                .style('fill-opacity', function (d, i) { return chart.series[i].alpha; })
-                .on('mousemove', function(d, i) {
-                    var balloonContent = chart.getXYFormat(d, chart.series[d.index]);
-
-                    //show balloon
-                    chart.showBalloon(balloonContent);
-
-                    //increase bullet stroke size
-                    d3.select(this)
-                        .style('stroke-width', function (d) { return chart.series[i].strokeSize + 1; });
-                })
-                .on('mouseout', function(d, i) {
-                    //hide balloon
-                    chart.hideBalloon();
-
-                    //increase bullet stroke size
-                    d3.select(this)
-                        .style('stroke-width', function (d) { return chart.series[i].strokeSize; });
-                });
-        }
-
-        //init chart
-        init();
-
-        //return chart object
-        return chart;
-    }
-
-    //attach bar method into eve
-    e.barChart = function(options) {
-        //set chart type
-        options.type = 'bar';
-
-        return new bar(options);
-    };
-
-    //attach bar method into eve
-    e.columnChart = function(options) {
-        //set chart type
-        options.type = 'column';
-
-        return new bar(options);
-    };
-})(eve);
-
-(function(e) {
-    //define default options
-    var defaults = {
-        bullet: 'none',
-        bulletAlpha: .5,
-        bulletColor: '',
-        bulletSize: 8,
-        bulletStrokeSize: 1,
-        bulletStrokeAlpha: 1,
-        color: '',
-        dateFormat: '',
-        labelFontColor: '#ffffff',
-        labelFontFamily: 'Tahoma',
-        labelFontSize: 11,
-        labelFontStyle: 'normal',
-        labelFormat: '',
-        maxBulletSize: 50,
-        minBulletSize: 5,
-        numberFormat: '',
-        title: '',
-        type: 'bubble',
-        yField: ''
-    };
-
-    //bubble chart class
-    function bubble(options) {
-        //check whether the options has series
-        if(options.series == null && e.getType(options.series) !== 'array') {
-            throw new Error('Invalid chart series!');
-        }
-
-        //iterate all series in options to extend them
-        for(var i=0; i<options.series.length; i++) {
-            //extend current serie with defaults
-            e.extend(options.series[i], defaults);
-        }
-
-        //create chart
-        var that = this,
-            chart = e.charts.init(options),
-            axis = e.charts.createAxis(chart),
-            bubbleSeries, bulletF;
-
-        //initializes bubble chart
-        function init() {
-            //create bullet function
-            bulletF = d3.svg.symbol().type(function(d) {
-                return chart.series[d.index].bullet === 'none' ? 'circle' : chart.series[d.index].bullet;
-            }).size(function(d) {
-                //get axis serie
-                var chartSerie = chart.series[d.index];
-                var axisSerie = axis.series[d.index];
-
-                //check whether the chartSerie has sizeField
-                if (chartSerie.sizeField !== '') {
-                    //calculate bullet size
-                    var axisSerieRange = axisSerie.maxSize - axisSerie.minSize,
-                        chartSerieRange = chartSerie.maxBulletSize - chartSerie.minBulletSize,
-                        bulletSize = d.sizeValue / axisSerieRange * chartSerieRange - (axisSerie.minSize / axisSerieRange * chartSerieRange) + chartSerie.minBulletSize;
-
-                    //return calculated bullet size
-                    return Math.pow(bulletSize, 2);
-                } else {
-                    //return default bullet size
-                    return Math.pow(chartSerie.bulletSize, 2);
-                }
-            });
-
-            //set default balloon format
-            if(chart.balloon.format === '')
-                chart.balloon.format = 'x: {x}: y: {y}, size: {size}';
-
-            //create gradient
-            var grads = chart.svg.append('defs').selectAll('radialGradient')
-                .data(axis.series)
-                .enter().append('radialGradient')
-                .attr('cx', 0)
-                .attr('cy', 0)
-                .attr('r', '100%')
-                .attr('id', function (d, i) { return 'eve-grad-' + i; })
-
-            //append stops in grads
-            grads.append('stop').attr('offset', '10%').attr('stop-color', '#ffffff');
-            grads.append('stop').attr('offset', '100%').attr('stop-color', function (d, i) {
-                //check whether the serie has color
-                if (chart.series[i].color === '')
-                    return i <= e.colors.length ? e.colors[i] : e.randColor();
-                else
-                    return chart.series[i].color;
-            });
-
-            //create bubble series
-            bubbleSeries = chart.svg.selectAll('.eve-series')
-                .data(axis.series)
-                .enter().append('g')
-                .attr('class', 'eve-series');
-
-            //append serie points
-            bubbleSeries.selectAll('.eve-bubble-point')
-                .data(function (d) { return d.values; })
-                .enter().append('path')
-                .attr('class', function (d, i) { return 'eve-bubble-point eve-bubble-point-' + d.index; })
-                .attr('d', function (d) { return bulletF(d); })
-                .style('cursor', 'pointer')
-                .style('fill', function (d) {
-                    return 'url(#eve-grad-' + d.index + ')';
-                })
-                .style('stroke', function (d) {
-                    //check whether the serie has color
-                    if (chart.series[d.index].color === '')
-                        return d.index <= e.colors.length ? e.colors[d.index] : e.randColor();
-                    else
-                        return chart.series[d.index].color;
-                })
-                .style('stroke-width', function (d) { return chart.series[d.index].bulletStrokeSize + 'px'; })
-                .style('stroke-opacity', function (d) { return chart.series[d.index].bulletStrokeAlpha; })
-                .style('stroke-dasharray', 0)
-                .style('fill-opacity', function (d) { return chart.series[d.index].bulletAlpha; })
-                .attr('transform', function (d) { return 'translate(' + (axis.x(d.xValue) + axis.offset.left) + ',' + axis.y(d.yValue) + ')'; })
-                .on('mousemove', function(d, i) {
-                    var balloonContent = chart.getXYFormat(d, chart.series[d.index]);
-
-                    //show balloon
-                    chart.showBalloon(balloonContent);
-
-                    //increase bullet stroke size
-                    d3.select(this).style('stroke-width', chart.series[d.index].bulletStrokeSize + 1);
-                })
-                .on('mouseout', function(d, i) {
-                    //hide balloon
-                    chart.hideBalloon();
-
-                    //increase bullet stroke size
-                    d3.select(this).style('stroke-width', chart.series[d.index].bulletStrokeSize);
-                });
-        }
-
-        //init bubble chart
-        init();
-
-        //return chart object
-        return chart;
-    };
-
-    //attach bubble method into eve
-    e.bubbleChart = function(options) {
-        //set chart type
-        options.type = 'bubble';
-
-        return new bubble(options);
-    };
-})(eve);
-
 (function(e) {
     //serie defaults
     var defaults = {
@@ -2509,7 +1913,10 @@
                                 .duration(chart.animationDuration / 2)
                                 .attr('transform', function () {
                                     //return translation
-                                    return 'translate(10)';
+                                    if(isPyramid)
+                                        return 'translate(' + (funnelWidth + 10) + ',' + funnelHeight + ')rotate(180)';
+                                    else
+                                        return 'translate(10)';
                                 });
 
                             //check index
@@ -2528,7 +1935,10 @@
                                 .duration(chart.animationDuration / 2)
                                 .attr('transform', function () {
                                     //return translation
-                                    return 'translate(0)';
+                                    if(isPyramid)
+                                        return 'translate(' + funnelWidth + ',' + funnelHeight + ')rotate(180)';
+                                    else
+                                        return 'translate(0)';
                                 });
 
                             //check index
@@ -2579,7 +1989,10 @@
                                 .duration(chart.animationDuration / 2)
                                 .attr('transform', function () {
                                     //return translation
-                                    return 'translate(10)';
+                                    if(isPyramid)
+                                        return 'translate(' + (funnelWidth + 10) + ',' + funnelHeight + ')rotate(180)';
+                                    else
+                                        return 'translate(10)';
                                 });
 
                             //check index
@@ -2598,7 +2011,10 @@
                                 .duration(chart.animationDuration / 2)
                                 .attr('transform', function () {
                                     //return translation
-                                    return 'translate(0)';
+                                    if(isPyramid)
+                                        return 'translate(' + funnelWidth + ',' + funnelHeight + ')rotate(180)';
+                                    else
+                                        return 'translate(0)';
                                 });
 
                             //check index
@@ -2673,7 +2089,10 @@
                             .duration(chart.animationDuration / 2)
                             .attr('transform', function () {
                                 //return translation
-                                return 'translate(10)';
+                                if(isPyramid)
+                                    return 'translate(' + (funnelWidth + 10) + ',' + funnelHeight + ')rotate(180)';
+                                else
+                                    return 'translate(10)';
                             });
 
                         //check index
@@ -2692,7 +2111,10 @@
                             .duration(chart.animationDuration / 2)
                             .attr('transform', function () {
                                 //return translation
-                                return 'translate(0)';
+                                if(isPyramid)
+                                    return 'translate(' + funnelWidth + ',' + funnelHeight + ')rotate(180)';
+                                else
+                                    return 'translate(0)';
                             });
 
                         //check index
@@ -2896,7 +2318,6 @@
     }
 
 })(eve);
-
 (function(e) {
     //define default options
     var defaults = {
@@ -2910,9 +2331,9 @@
         color: '',
         dateFormat: '',
         drawingStyle: 'solid', //solid, dashed, dotted
-        labelFontColor: '#ffffff',
+        labelFontColor: '#333333',
         labelFontFamily: 'Tahoma',
-        labelFontSize: 11,
+        labelFontSize: 10,
         labelFontStyle: 'normal',
         labelFormat: '',
         lineAlpha: 1,
@@ -2984,7 +2405,12 @@
         function init() {
             //create line function
             lineF = d3.svg.line()
-                .x(function(d) { return axis.x(d.xValue); })
+                .x(function(d) { 
+                    if(axis.xAxisDataType === 'string')
+                        return axis.x(d.xValue) + axis.x.rangeBand() / 2;
+                    else
+                        return axis.x(d.xValue); 
+                })
                 .y(function(d) { return axis.y(d.yValue); });
 
             //create bullet function
@@ -3038,6 +2464,28 @@
                         return chart.series[i].color;
                 });
 
+            //set serie labels
+            lineSeries.selectAll('.eve-line-label')
+                .data(function(d) { return d.values; })
+                .enter().append('text')
+                .attr('class', function(d, i) { return 'eve-line-label eve-line-label-' + i; })
+                .style('cursor', 'pointer')
+                .style('fill', function(d, i) { return chart.series[d.index].labelFontColor; })
+                .style('font-weight', function(d, i) { return chart.series[d.index].labelFontStyle == 'bold' ? 'bold' : 'normal'; })
+                .style('font-style', function(d, i) { return chart.series[d.index].labelFontStyle == 'bold' ? 'normal' : chart.series[d.index].labelFontStyle; })
+                .style("font-family", function(d, i) { return chart.series[d.index].labelFontFamily; })
+                .style("font-size", function(d, i) { return chart.series[d.index].labelFontSize + 'px'; })
+                .style('text-anchor', 'middle')
+                .text(function(d, i) {
+                    //check whether the label format is enabled
+                    if(chart.series[d.index].labelFormat != '')
+                        return chart.getXYFormat(d, chart.series[d.index], 'label');
+                })
+                .attr('transform', function(d) {
+                    //return translated label positions
+                    return 'translate(' + (axis.x(d.xValue) + axis.offset.left) + ',' + (axis.y(d.yValue) - chart.series[d.index].bulletSize) + ')';
+                });
+
             //append serie points
             lineBullets = lineSeries.selectAll('.eve-line-point')
                 .data(function (d) { return d.values; })
@@ -3063,10 +2511,15 @@
                 .style('stroke-width', function (d) { return chart.series[d.index].bulletStrokeSize + 'px'; })
                 .style('stroke-opacity', 0)
                 .style('fill-opacity', 0)
-                .attr('transform', function (d) { return 'translate(' + (axis.x(d.xValue) + axis.offset.left) + ',' + axis.y(d.yValue) + ')'; })
-                .on('mousemove', function(d, i) {
+                .attr('transform', function (d) {
+                    if(axis.xAxisDataType === 'string')
+                        return 'translate(' + (axis.x(d.xValue) + axis.offset.left + (axis.x.rangeBand() / 2)) + ',' + axis.y(d.yValue) + ')';
+                    else
+                        return 'translate(' + (axis.x(d.xValue) + axis.offset.left) + ',' + axis.y(d.yValue) + ')';
+                })
+                .on('mousemove', function (d, i) {
                     var balloonContent = chart.getXYFormat(d, chart.series[d.index]);
-
+                    
                     //show balloon
                     chart.showBalloon(balloonContent);
 
@@ -3101,7 +2554,6 @@
         return new line(options);
     };
 })(eve);
-
 (function(e) {
     //serie defaults
     var defaults = {
@@ -3571,7 +3023,6 @@
         return new pie(options, true);
     }
 })(eve);
-
 (function(e) {
     //define default options
     var defaults = {
@@ -3583,9 +3034,9 @@
         bulletStrokeAlpha: 1,
         color: '',
         dateFormat: '',
-        labelFontColor: '#ffffff',
+        labelFontColor: '#333333',
         labelFontFamily: 'Tahoma',
-        labelFontSize: 11,
+        labelFontSize: 10,
         labelFontStyle: 'normal',
         labelFormat: '',
         numberFormat: '',
@@ -3658,6 +3109,28 @@
                 .enter().append('g')
                 .attr('class', 'eve-series');
 
+            //set serie labels
+            scatterSeries.selectAll('.eve-scatter-label')
+                .data(function(d) { return d.values; })
+                .enter().append('text')
+                .attr('class', function(d, i) { return 'eve-scatter-label eve-scatter-label-' + i; })
+                .style('cursor', 'pointer')
+                .style('fill', function(d, i) { return chart.series[d.index].labelFontColor; })
+                .style('font-weight', function(d, i) { return chart.series[d.index].labelFontStyle == 'bold' ? 'bold' : 'normal'; })
+                .style('font-style', function(d, i) { return chart.series[d.index].labelFontStyle == 'bold' ? 'normal' : chart.series[d.index].labelFontStyle; })
+                .style("font-family", function(d, i) { return chart.series[d.index].labelFontFamily; })
+                .style("font-size", function(d, i) { return chart.series[d.index].labelFontSize + 'px'; })
+                .style('text-anchor', 'middle')
+                .text(function(d, i) {
+                    //check whether the label format is enabled
+                    if(chart.series[d.index].labelFormat != '')
+                        return chart.getXYFormat(d, chart.series[d.index], 'label');
+                })
+                .attr('transform', function(d) {
+                    //return translated label positions
+                    return 'translate(' + (axis.x(d.xValue) + axis.offset.left) + ',' + (axis.y(d.yValue) - chart.series[d.index].bulletSize) + ')';
+                });
+
             //append serie points
             scatterSeries.selectAll('.eve-scatter-point')
                 .data(function (d) { return d.values; })
@@ -3683,7 +3156,12 @@
                 .style('stroke-opacity', function (d) { return chart.series[d.index].bulletStrokeAlpha; })
                 .style('stroke-dasharray', 0)
                 .style('fill-opacity', function (d) { return chart.series[d.index].bulletAlpha; })
-                .attr('transform', function (d) { return 'translate(' + (axis.x(d.xValue) + axis.offset.left) + ',' + axis.y(d.yValue) + ')'; })
+                .attr('transform', function (d) {
+                    if (axis.xAxisDataType === 'string')
+                        return 'translate(' + (axis.x(d.xValue) + axis.offset.left + (axis.x.rangeBand() / 2)) + ',' + axis.y(d.yValue) + ')';
+                    else
+                        return 'translate(' + (axis.x(d.xValue) + axis.offset.left) + ',' + axis.y(d.yValue) + ')';
+                })
                 .on('mousemove', function(d, i) {
                     var balloonContent = chart.getXYFormat(d, chart.series[d.index]);
 
@@ -3715,5 +3193,805 @@
         options.type = 'scatter';
 
         return new scatter(options);
+    };
+})(eve);
+(function(e) {
+    //define default options
+    var defaults = {
+        alpha: .7,
+        bullet: 'none',
+        bulletAlpha: .5,
+        bulletColor: '',
+        bulletSize: 8,
+        bulletStrokeSize: 1,
+        bulletStrokeAlpha: 1,
+        color: '',
+        dateFormat: '',
+        labelFontColor: '#333333',
+        labelFontFamily: 'Tahoma',
+        labelFontSize: 10,
+        labelFontStyle: 'normal',
+        labelFormat: '',
+        numberFormat: '',
+        title: '',
+        type: 'area',
+        yField: ''
+    };
+
+    //area chart class
+    function area(options) {
+        //check whether the options has series
+        if(options.series == null && e.getType(options.series) !== 'array') {
+            throw new Error('Invalid chart series!');
+        }
+
+        //iterate all series in options to extend them
+        for(var i=0; i<options.series.length; i++) {
+            //extend current serie with defaults
+            e.extend(options.series[i], defaults);
+        }
+        
+        //create chart
+        var that = this,
+            chart = e.charts.init(options),
+            axis = e.charts.createAxis(chart),
+            areaSeries, bulletSeries, labelSeries,
+            areaF, bulletF, stackF;
+        
+        //handles zoom
+        var zoom = d3.behavior.zoom().x(axis.x).y(axis.y).on("zoom", zoomHandler);
+        function zoomHandler() {
+            //re-draw axes
+            chart.svg.select('.eve-x-axis').call(axis.xAxis);
+            chart.svg.select('.eve-y-axis').call(axis.yAxis);
+
+            //re-create x axis grid
+			chart.svg.select(".eve-x-grid")
+				.call(
+                    axis.makeXAxis()
+	                .tickSize(-axis.offset.height, 0, 0)
+                );
+
+            //re-create y axis grid
+			chart.svg.select(".eve-y-grid")
+				.call(
+                    axis.makeYAxis()
+				    .tickSize(-axis.offset.width, 0, 0)
+                );
+        }
+
+        //attach zoomer
+        if(chart.zoomable)
+            chart.svg.call(zoom);
+
+        //initializes area chart
+        function init() {
+            //create stack function
+            stackF = d3.layout.stack()
+                .values(function (d) { return d.values; })
+                .x(function (d) { return d.xValue; })
+                .y(function (d) { return d.yValue; });
+
+            //stack series
+            stackF(axis.series);
+
+            //create area function
+            areaF = d3.svg.area()
+                .x(function (d) {
+                    if (axis.xAxisDataType === 'string')
+                        return axis.x(d.xValue) + axis.x.rangeBand() / 2;
+                    else
+                        return axis.x(d.xValue);
+                })
+                .y0(function (d) {
+                    return axis.y(d.y0);
+                })
+                .y1(function (d) {
+                    return axis.y(d.y0 + d.y);
+                });
+
+            //create bullet function
+            bulletF = d3.svg.symbol().type(function (d) {
+                return chart.series[d.index].bullet === 'none' ? 'circle' : chart.series[d.index].bullet;
+            }).size(function (d) {
+                return Math.pow(chart.series[d.index].bulletSize, 2);
+            });
+
+            //set default balloon format
+            if(chart.balloon.format === '')
+                chart.balloon.format = '{x}: {y}';
+
+            //create area series
+            areaSeries = chart.svg.selectAll('.eve-series')
+                .data(axis.series)
+                .enter().append('g')
+                .attr('class', 'eve-series');
+
+            //append area paths
+            areaSeries.append('path')
+                .attr('class', function (d, i) { return 'eve-area-serie eve-area-serie-' + i; })
+                .attr('d', function (d, i) {
+                    //return area function
+                    return areaF(d.values);
+                })
+                .attr('transform', 'translate(' + axis.offset.left + ')')
+                .style('fill', function (d, i) {
+                    //check whether the serie has color
+                    if (chart.series[i].color === '')
+                        return i <= e.colors.length ? e.colors[i] : e.randColor();
+                    else
+                        return chart.series[i].color;
+                })
+                .style('fill-opacity', function (d, i) { return chart.series[i].alpha; })
+                .style('stroke-width', 1.5)
+                .style('stroke-opacity', 1)
+                .style('stroke', function (d, i) {
+                    //check whether the serie has color
+                    if (chart.series[i].color === '')
+                        return i <= e.colors.length ? e.colors[i] : e.randColor();
+                    else
+                        return chart.series[i].color;
+                });
+
+            //append serie labels
+            labelSeries = areaSeries.selectAll('.eve-area-labels')
+                .data(axis.series)
+                .enter().append('g')
+                .attr('class', 'eve-area-labels');
+
+            //set serie labels
+            labelSeries.selectAll('.eve-area-label')
+                .data(function(d) { return d.values; })
+                .enter().append('text')
+                .attr('class', function(d) { return 'eve-area-label eve-area-label-' + d.index; })
+                .style('cursor', 'pointer')
+                .style('fill', function(d) { return chart.series[d.index].labelFontColor; })
+                .style('font-weight', function(d) { return chart.series[d.index].labelFontStyle == 'bold' ? 'bold' : 'normal'; })
+                .style('font-style', function(d) { return chart.series[d.index].labelFontStyle == 'bold' ? 'normal' : chart.series[d.index].labelFontStyle; })
+                .style("font-family", function(d) { return chart.series[d.index].labelFontFamily; })
+                .style("font-size", function(d) { return chart.series[d.index].labelFontSize + 'px'; })
+                .style('text-anchor', 'middle')
+                .text(function(d, i) {
+                    //check whether the label format is enabled
+                    if(chart.series[d.index].labelFormat != '')
+                        return chart.getXYFormat(d, chart.series[d.index], 'label');
+                })
+                .attr('transform', function(d) {
+                    //return translated label positions
+                    return 'translate(' + (axis.x(d.xValue) + axis.offset.left) + ',' + axis.y(d.y0 + d.y) + ')';
+                });
+
+            //append serie points
+            bulletSeries = areaSeries.selectAll('.eve-area-points')
+                .data(axis.series)
+                .enter().append('g')
+                .attr('class', 'eve-area-points');
+
+            //set points
+            bulletSeries.selectAll('.eve-area-point')
+                .data(function (d) { return d.values; })
+                .enter().append('path')
+                .attr('class', function (d, i) { return 'eve-area-point eve-are-point-' + d.index; })
+                .attr('d', bulletF)
+                .style('cursor', 'pointer')
+                .style('fill', '#ffffff')
+                .style('stroke', function (d) {
+                    //check whether the serie has color
+                    if (chart.series[d.index].color === '')
+                        return d.index <= e.colors.length ? e.colors[d.index] : e.randColor();
+                    else
+                        return chart.series[d.index].color;
+                })
+                .style('stroke-width', function (d) { return chart.series[d.index].bulletStrokeSize + 'px'; })
+                .style('stroke-opacity', 0)
+                .style('fill-opacity', 0)
+                .attr('transform', function (d) {
+                    if(axis.xAxisDataType === 'string')
+                        return 'translate(' + (axis.x(d.xValue) + axis.offset.left + (axis.x.rangeBand() / 2)) + ',' + axis.y(d.y0 + d.y) + ')';
+                    else
+                        return 'translate(' + (axis.x(d.xValue) + axis.offset.left) + ',' + axis.y(d.y0 + d.y) + ')';
+                })
+                .on('mousemove', function (d, i) {
+                    var balloonContent = chart.getXYFormat(d, chart.series[d.index]);
+
+                    //show balloon
+                    chart.showBalloon(balloonContent);
+
+                    //increase bullet stroke size
+                    d3.select(this)
+                        .style('stroke-opacity', function (d) { return chart.series[d.index].bulletStrokeAlpha; })
+                        .style('fill-opacity', function (d) { return chart.series[d.index].bulletAlpha; });
+                })
+                .on('mouseout', function(d, i) {
+                    //hide balloon
+                    chart.hideBalloon();
+
+                    //increase bullet stroke size
+                    d3.select(this)
+                        .style('stroke-opacity', 0)
+                        .style('fill-opacity', 0);
+                })
+        }
+
+        //init area
+        init();
+
+        //return chart object
+        return chart;
+    }
+
+    //attach area method into eve
+    e.areaChart = function(options) {
+        //set chart type
+        options.type = 'area';
+
+        return new area(options);
+    };
+})(eve);
+(function(e) {
+    //define default options
+    var defaults = {
+        alpha: 1,
+        color: '',
+        dateFormat: '',
+        labelFontColor: '#333333',
+        labelFontFamily: 'Tahoma',
+        labelFontSize: 10,
+        labelFontStyle: 'normal',
+        labelFormat: '',
+        numberFormat: '',
+        strokeSize: 1,
+        title: '',
+        type: 'bar',
+        yField: ''
+    };
+
+    //bar chart class
+    function bar(options) {
+        //check whether the options has series
+        if(options.series == null && e.getType(options.series) !== 'array') {
+            throw new Error('Invalid chart series!');
+        }
+
+        //iterate all series in options to extend them
+        for(var i=0; i<options.series.length; i++) {
+            //extend current serie with defaults
+            e.extend(options.series[i], defaults);
+        }
+
+        //create chart
+        var that = this,
+            chart = e.charts.init(options),
+            isReversed = chart.type === 'bar',
+            axis = e.charts.createAxis(chart),
+            barPadding = 25,
+            groupAxis, stackedBars, stackedBarsRects, stackedBarsTexts,
+            groupedBars, groupedBarsRects, groupedBarsTexts;
+
+        //initializes bar chart
+        function init() {
+            //set default balloon format
+            if(chart.balloon.format === '')
+                chart.balloon.format = '{x}: {y}';
+            
+            //initialize bar chart via stack state
+            if(chart.yAxis.stacked) {
+                //create stacked bar chart
+                createStackedBars();
+            } else {
+                //set range band
+                var rangeBand = chart.type === 'bar' ? axis.y.rangeBand() : axis.x.rangeBand();
+
+                //set group axis
+                groupAxis = d3.scale.ordinal().domain(axis.serieNames).rangeRoundBands([0, rangeBand]);
+
+                //create grouped bar chart
+                createGroupedBars();
+            }
+        }
+
+        //creates stacked bar chart
+        function createStackedBars() {
+            //manipulate chart data
+            chart.data.forEach(function(d) {
+                //set first y value
+                var y0 = 0;
+
+                //set series
+                d.values = axis.serieNames.map(function(name) {
+                    //set value object
+                    var dataObj = {
+                        name: 'name',
+                        xValue: d[chart.xField],
+                        yValue: +d[name],
+                        y0: y0,
+                        y1: y0 += +d[name]
+                    };
+
+                    //return data object
+                    return dataObj;
+                });
+
+                //set serie total
+                d.total = d.values[d.values.length - 1].y1;
+            });
+
+            //sort chart data
+            chart.data.sort(function (a, b) { return b.total - a.total; });
+            
+            //check whether the axis is reversed
+            /*if (isReversed)
+                axis.x.domain([0, d3.max(chart.data, function (d) { return d.total; })]);
+            else
+                axis.y.domain([0, d3.max(chart.data, function (d) { return d.total; })]);*/
+
+            //create stack bars on canvas
+            stackedBars = chart.svg.selectAll('.eve-series')
+                .data(chart.data)
+                .enter().append('g')
+                .attr('class', 'eve-series')
+                .attr('transform', function (d) {
+                    //check whether the chart is reversed
+                    if (isReversed) {
+                        return 'translate(' + axis.offset.left + ',' + (axis.y(d[chart.xField])) + ')';
+                    } else {
+                        return 'translate(' + (axis.x(d[chart.xField]) + axis.offset.left) + ',0)';
+                    }
+                });
+
+            //create stacked bar rectangles
+            stackedBarsRects = stackedBars.selectAll('rect')
+                .data(function (d) { return d.values; })
+                .enter().append('rect')
+                .attr('class', function (d, i) { return 'eve-bar-serie eve-bar-serie-' + i; })
+                .attr('width', function (d) { return isReversed ? (axis.x(d.y1) - axis.x(d.y0)) : axis.x.rangeBand(); })
+                .attr('height', function (d) { return isReversed ? axis.y.rangeBand() : (axis.y(d.y0) - axis.y(d.y1)); })
+                .style('fill', function (d, i) {
+                    //check whether the serie has color
+                    if (chart.series[i].color === '')
+                        return i <= e.colors.length ? e.colors[i] : e.randColor();
+                    else
+                        return chart.series[i].color;
+                })
+                .style('stroke', function (d, i) {
+                    //check whether the serie has color
+                    if (chart.series[i].color === '')
+                        return i <= e.colors.length ? e.colors[i] : e.randColor();
+                    else
+                        return chart.series[i].color;
+                })
+                .style('stroke-width', function (d, i) { return chart.series[i].strokeSize + 'px'; })
+                .style('stroke-opacity', function (d, i) { return chart.series[i].alpha; })
+                .style('fill-opacity', function (d, i) { return chart.series[i].alpha; })
+                .on('mousemove', function(d, i) {
+                    var balloonContent = chart.getXYFormat(d, chart.series[d.index]);
+
+                    //show balloon
+                    chart.showBalloon(balloonContent);
+
+                    //increase bullet stroke size
+                    d3.select(this)
+                        .style('stroke-width', function (d) { return chart.series[i].strokeSize + 1; });
+                })
+                .on('mouseout', function(d, i) {
+                    //hide balloon
+                    chart.hideBalloon();
+
+                    //increase bullet stroke size
+                    d3.select(this)
+                        .style('stroke-width', function (d) { return chart.series[i].strokeSize; });
+                });
+
+            //set serie labels
+            stackedBarsTexts = stackedBars.selectAll('text')
+                .data(function(d) { return d.values; })
+                .enter().append('text')
+                .attr('class', function(d, i) { return 'eve-bar-label eve-bar-label-' + i; })
+                .style('cursor', 'pointer')
+                .style('fill', function(d, i) { return chart.series[i].labelFontColor; })
+                .style('font-weight', function(d, i) { return chart.series[i].labelFontStyle == 'bold' ? 'bold' : 'normal'; })
+                .style('font-style', function(d, i) { return chart.series[i].labelFontStyle == 'bold' ? 'normal' : chart.series[i].labelFontStyle; })
+                .style("font-family", function(d, i) { return chart.series[i].labelFontFamily; })
+                .style("font-size", function(d, i) { return chart.series[i].labelFontSize + 'px'; })
+                .text(function(d, i) {
+                    //check whether the label format is enabled
+                    if(chart.series[i].labelFormat != '')
+                        return chart.getXYFormat(d, chart.series[i], 'label');
+                });
+
+            //check whether the chart is reversed
+            if (isReversed) {
+                stackedBarsRects.attr('x', function (d) { return axis.x(d.y0); });
+                stackedBarsTexts
+                    .attr('x', function (d, i) {
+                        //return calculated x pos
+                        return axis.x(d.y0) + (axis.x(d.y1) - axis.x(d.y0)) - this.getBBox().width - 2;
+                    })
+                    .attr('y', function (d, i) {
+                        //return calculated y pos
+                        return axis.y.rangeBand() - 2;
+                    });
+            } else {
+                stackedBarsRects.attr('y', function (d) { return axis.y(d.y1); });
+                stackedBarsTexts
+                    .attr('x', function (d, i) {
+                        //return calculated x pos
+                        return (axis.x.rangeBand() / 2 - this.getBBox().width / 2);
+                    })
+                    .attr('y', function (d) {
+                        //return calculated y pos
+                        return axis.y(d.y1) + this.getBBox().height - 2;
+                    });
+            }
+        }
+
+        //creates grouped bar chart
+        function createGroupedBars() {
+            //set all values by series
+            chart.data.forEach(function (d) {
+                d.values = axis.serieNames.map(function (name) {
+                    return {
+                        name: name,
+                        xValue: d[chart.xField],
+                        yValue: +d[name]
+                    };
+                })
+            });
+
+            //get new y domain
+            var newYDomain = [0, d3.max(chart.data, function (d) {
+                return d3.max(d.values, function (v) {
+                    return v.yValue * 1.1;
+                });
+            })];
+
+            //check whether the chart is reversed
+            if (isReversed) {
+                //set new domain
+                newYDomain = [d3.max(chart.data, function (d) {
+                    return d3.max(d.values, function (v) {
+                        return v.yValue * 1.1;
+                    });
+                }), 0];
+
+                //update x axis
+                axis.x.domain(newYDomain);
+            } else {
+                //update y axis
+                axis.y.domain(newYDomain);
+            }
+
+            //get range band
+            var rangeBand = groupAxis.rangeBand();
+
+            //create bar groups on canvas
+            groupedBars = chart.svg.selectAll('.eve-series')
+                .data(chart.data)
+                .enter().append('g')
+                .attr('class', 'eve-series')
+                .attr('transform', function (d) {
+                    if (isReversed)
+                        return 'translate(' + (axis.offset.left) + ',' + (axis.y(d[chart.xField])) + ')';
+                    else
+                        return 'translate(' + (axis.x(d[chart.xField]) + axis.offset.left) + ',0)';
+                });
+
+            //create bar group rectangles
+            groupedBarsRects = groupedBars.selectAll('rect')
+                .data(function (d) { return d.values; })
+                .enter().append('rect')
+                .attr('class', function (d, i) { return 'eve-bar-serie eve-bar-serie-' + i; })
+                .attr('width', function (d) { return isReversed ? (axis.offset.width - axis.x(d.yValue)) : rangeBand; })
+                .attr('x', function (d) { return isReversed ? 0 : groupAxis(d.name); })
+                .attr('y', function (d) { return isReversed ? groupAxis(d.name) : axis.y(d.yValue); })
+                .attr('height', function (d) { return isReversed ? rangeBand : (axis.offset.height - axis.y(d.yValue)); })
+                .style('fill', function (d, i) {
+                    //check whether the serie has color
+                    if (chart.series[i].color === '')
+                        return i <= e.colors.length ? e.colors[i] : e.randColor();
+                    else
+                        return chart.series[i].color;
+                })
+                .style('stroke', '#ffffff')
+                .style('stroke-width', function (d, i) { return chart.series[i].strokeSize + 'px'; })
+                .style('stroke-opacity', function (d, i) { return chart.series[i].alpha; })
+                .style('fill-opacity', function (d, i) { return chart.series[i].alpha; })
+                .on('mousemove', function(d, i) {
+                    var balloonContent = chart.getXYFormat(d, chart.series[d.index]);
+
+                    //show balloon
+                    chart.showBalloon(balloonContent);
+
+                    //increase bullet stroke size
+                    d3.select(this)
+                        .style('stroke-width', function (d) { return chart.series[i].strokeSize + 1; });
+                })
+                .on('mouseout', function(d, i) {
+                    //hide balloon
+                    chart.hideBalloon();
+
+                    //increase bullet stroke size
+                    d3.select(this)
+                        .style('stroke-width', function (d) { return chart.series[i].strokeSize; });
+                });
+
+            //set serie labels
+            groupedBarsTexts = groupedBars.selectAll('text')
+                .data(function(d) { return d.values; })
+                .enter().append('text')
+                .attr('class', function(d, i) { return 'eve-bar-label eve-bar-label-' + i; })
+                .style('cursor', 'pointer')
+                .style('fill', function(d, i) { return chart.series[i].labelFontColor; })
+                .style('font-weight', function(d, i) { return chart.series[i].labelFontStyle == 'bold' ? 'bold' : 'normal'; })
+                .style('font-style', function(d, i) { return chart.series[i].labelFontStyle == 'bold' ? 'normal' : chart.series[i].labelFontStyle; })
+                .style("font-family", function(d, i) { return chart.series[i].labelFontFamily; })
+                .style("font-size", function(d, i) { return chart.series[i].labelFontSize + 'px'; })
+                .text(function(d, i) {
+                    //check whether the label format is enabled
+                    if(chart.series[i].labelFormat != '')
+                        return chart.getXYFormat(d, chart.series[i], 'label');
+                })
+                .attr('x', function(d, i) {
+                    //return calculated x pos
+                    return isReversed ? (axis.offset.width - axis.x(d.yValue)) : (i * rangeBand);
+                })
+                .attr('y', function(d, i) {
+                    //return calculated y pos
+                    return isReversed ? groupAxis(d.name) + rangeBand : axis.y(d.yValue) - 2;
+                });
+        }
+
+        //init chart
+        init();
+
+        //return chart object
+        return chart;
+    }
+
+    //attach bar method into eve
+    e.barChart = function(options) {
+        //set chart type
+        options.type = 'bar';
+
+        return new bar(options);
+    };
+
+    //attach bar method into eve
+    e.columnChart = function(options) {
+        //set chart type
+        options.type = 'column';
+
+        return new bar(options);
+    };
+})(eve);
+(function(e) {
+    //define default options
+    var defaults = {
+        bullet: 'none',
+        bulletAlpha: .5,
+        bulletColor: '',
+        bulletSize: 8,
+        bulletStrokeSize: 1,
+        bulletStrokeAlpha: 1,
+        color: '',
+        dateFormat: '',
+        labelFontColor: '#333333',
+        labelFontFamily: 'Tahoma',
+        labelFontSize: 10,
+        labelFontStyle: 'normal',
+        labelFormat: '',
+        maxBulletSize: 50,
+        minBulletSize: 5,
+        numberFormat: '',
+        title: '',
+        type: 'bubble',
+        yField: ''
+    };
+
+    //bubble chart class
+    function bubble(options) {
+        //check whether the options has series
+        if(options.series == null && e.getType(options.series) !== 'array') {
+            throw new Error('Invalid chart series!');
+        }
+
+        //iterate all series in options to extend them
+        for(var i=0; i<options.series.length; i++) {
+            //extend current serie with defaults
+            e.extend(options.series[i], defaults);
+        }
+
+        //create chart
+        var that = this,
+            chart = e.charts.init(options),
+            axis = e.charts.createAxis(chart),
+            bubbleSeries, bulletF;
+
+        //initializes bubble chart
+        function init() {
+            //create bullet function
+            bulletF = d3.svg.symbol().type(function(d) {
+                return chart.series[d.index].bullet === 'none' ? 'circle' : chart.series[d.index].bullet;
+            }).size(function(d) {
+                //get axis serie
+                var chartSerie = chart.series[d.index];
+                var axisSerie = axis.series[d.index];
+
+                //check whether the chartSerie has sizeField
+                if (chartSerie.sizeField !== '') {
+                    //calculate bullet size
+                    var axisSerieRange = axisSerie.maxSize - axisSerie.minSize,
+                        chartSerieRange = chartSerie.maxBulletSize - chartSerie.minBulletSize,
+                        bulletSize = d.sizeValue / axisSerieRange * chartSerieRange - (axisSerie.minSize / axisSerieRange * chartSerieRange) + chartSerie.minBulletSize;
+
+                    //return calculated bullet size
+                    return Math.pow(bulletSize, 2);
+                } else {
+                    //return default bullet size
+                    return Math.pow(chartSerie.bulletSize, 2);
+                }
+            });
+
+            //set default balloon format
+            if(chart.balloon.format === '')
+                chart.balloon.format = 'x: {x}: y: {y}, size: {size}';
+
+            //create gradient
+            var grads = chart.svg.append('defs').selectAll('radialGradient')
+                .data(axis.series)
+                .enter().append('radialGradient')
+                .attr('cx', 0)
+                .attr('cy', 0)
+                .attr('r', '100%')
+                .attr('id', function (d, i) { return 'eve-grad-' + i; })
+
+            //append stops in grads
+            grads.append('stop').attr('offset', '10%').attr('stop-color', '#ffffff');
+            grads.append('stop').attr('offset', '100%').attr('stop-color', function (d, i) {
+                //check whether the serie has color
+                if (chart.series[i].color === '')
+                    return i <= e.colors.length ? e.colors[i] : e.randColor();
+                else
+                    return chart.series[i].color;
+            });
+
+            //create bubble series
+            bubbleSeries = chart.svg.selectAll('.eve-series')
+                .data(axis.series)
+                .enter().append('g')
+                .attr('class', 'eve-series');
+
+            //set serie labels
+            bubbleSeries.selectAll('.eve-bubble-label')
+                .data(function(d) { return d.values; })
+                .enter().append('text')
+                .attr('class', function (d, i) {
+                    return 'eve-bubble-label eve-bubble-label-' + i;
+                })
+                .style('cursor', 'pointer')
+                .style('fill', function(d, i) { return chart.series[d.index].labelFontColor; })
+                .style('font-weight', function(d, i) { return chart.series[d.index].labelFontStyle == 'bold' ? 'bold' : 'normal'; })
+                .style('font-style', function(d, i) { return chart.series[d.index].labelFontStyle == 'bold' ? 'normal' : chart.series[d.index].labelFontStyle; })
+                .style("font-family", function(d, i) { return chart.series[d.index].labelFontFamily; })
+                .style("font-size", function(d, i) { return chart.series[d.index].labelFontSize + 'px'; })
+                .style('text-anchor', 'middle')
+                .text(function(d, i) {
+                    //check whether the label format is enabled
+                    if(chart.series[d.index].labelFormat != '')
+                        return chart.getXYFormat(d, chart.series[d.index], 'label');
+                })
+                .attr('transform', function(d) {
+                    //get axis serie
+                    var chartSerie = chart.series[d.index];
+                    var axisSerie = axis.series[d.index];
+                    var labelHeightPos = 0;
+                    var bulletSize = 0;
+
+                    //check whether the chartSerie has sizeField
+                    if (chartSerie.sizeField !== '') {
+                        //calculate bullet size
+                        var axisSerieRange = axisSerie.maxSize - axisSerie.minSize,
+                            chartSerieRange = chartSerie.maxBulletSize - chartSerie.minBulletSize;
+                    
+                        //set bullet size
+                        bulletSize = d.sizeValue / axisSerieRange * chartSerieRange - (axisSerie.minSize / axisSerieRange * chartSerieRange) + chartSerie.minBulletSize;
+
+                        //return calculated bullet size
+                        labelHeightPos = bulletSize / 2;
+                    } else {
+                        //return default bullet size
+                        labelHeightPos = chartSerie.bulletSize / 2;
+                    }
+
+                    //return translated label positions
+                    return 'translate(' + (axis.x(d.xValue) + axis.offset.left) + ',' + (axis.y(d.yValue) - labelHeightPos - (chart.series[d.index].labelFontSize / 2) - bulletSize) + ')';
+                });
+
+            //append serie points
+            bubbleSeries.selectAll('.eve-bubble-point')
+                .data(function (d) { return d.values; })
+                .enter().append('path')
+                .attr('class', function (d, i) {
+                    if (d.yValue === 0)
+                        return 'eve-bubble-point-null eve-bubble-point-null-' + d.index;
+                    else
+                        return 'eve-bubble-point eve-bubble-point-' + d.index;
+                })
+                .attr('d', function (d) { return bulletF(d); })
+                .style('cursor', 'pointer')
+                .style('fill', function (d) {
+                    return 'url(#eve-grad-' + d.index + ')';
+                })
+                .style('stroke', function (d) {
+                    //check whether the serie has color
+                    if (chart.series[d.index].color === '')
+                        return d.index <= e.colors.length ? e.colors[d.index] : e.randColor();
+                    else
+                        return chart.series[d.index].color;
+                })
+                .style('stroke-width', function (d) { return chart.series[d.index].bulletStrokeSize + 'px'; })
+                .style('stroke-opacity', function (d) {
+                    if (d.yValue === 0) return 0;
+                    return chart.series[d.index].bulletStrokeAlpha;
+                })
+                .style('stroke-dasharray', 0)
+                .style('fill-opacity', function (d) {
+                    if (d.yValue === 0) return 0;
+                    return chart.series[d.index].bulletAlpha;
+                })
+                .attr('transform', function (d) {
+                    //declare needed variables
+                    var chartSerie = chart.series[d.index];
+                    var axisSerie = axis.series[d.index];
+                    var bulletSize = 0;
+                
+                    //check size field
+                    if (chartSerie.sizeField !== '') {
+                        //calculate bullet size
+                        var axisSerieRange = axisSerie.maxSize - axisSerie.minSize,
+                            chartSerieRange = chartSerie.maxBulletSize - chartSerie.minBulletSize;
+                    
+                        //set bullet size
+                        bulletSize = d.sizeValue / axisSerieRange * chartSerieRange - (axisSerie.minSize / axisSerieRange * chartSerieRange) + chartSerie.minBulletSize;
+                    }
+                
+                    //check x axis data type
+                    if(axis.xAxisDataType === 'string')
+                        return 'translate(' + (axis.x(d.xValue) + axis.offset.left + (axis.x.rangeBand() / 2)) + ',' + (axis.y(d.yValue) - bulletSize / 2) + ')';
+                    else
+                        return 'translate(' + (axis.x(d.xValue) + axis.offset.left) + ',' + (axis.y(d.yValue) - bulletSize / 2) + ')';
+                })
+                .on('mousemove', function (d, i) {
+                    if (d.yValue === 0) return null;
+                    var balloonContent = chart.getXYFormat(d, chart.series[d.index]);
+
+                    //show balloon
+                    chart.showBalloon(balloonContent);
+
+                    //increase bullet stroke size
+                    d3.select(this).style('stroke-width', chart.series[d.index].bulletStrokeSize + 1);
+                })
+                .on('mouseout', function(d, i) {
+                    //hide balloon
+                    chart.hideBalloon();
+
+                    //increase bullet stroke size
+                    d3.select(this).style('stroke-width', chart.series[d.index].bulletStrokeSize);
+                });
+        }
+
+        //init bubble chart
+        init();
+
+        //return chart object
+        return chart;
+    };
+
+    //attach bubble method into eve
+    e.bubbleChart = function(options) {
+        //set chart type
+        options.type = 'bubble';
+
+        return new bubble(options);
     };
 })(eve);

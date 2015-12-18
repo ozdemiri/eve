@@ -17,9 +17,9 @@
         alpha: 1,
         color: '',
         dateFormat: '',
-        labelFontColor: '#ffffff',
+        labelFontColor: '#333333',
         labelFontFamily: 'Tahoma',
-        labelFontSize: 11,
+        labelFontSize: 10,
         labelFontStyle: 'normal',
         labelFormat: '',
         numberFormat: '',
@@ -48,14 +48,15 @@
             isReversed = chart.type === 'bar',
             axis = e.charts.createAxis(chart),
             barPadding = 25,
-            groupAxis, stackedBars, stackedBarsRects, groupedBars, groupedBarsRects;
+            groupAxis, stackedBars, stackedBarsRects, stackedBarsTexts,
+            groupedBars, groupedBarsRects, groupedBarsTexts;
 
         //initializes bar chart
         function init() {
             //set default balloon format
             if(chart.balloon.format === '')
                 chart.balloon.format = '{x}: {y}';
-
+            
             //initialize bar chart via stack state
             if(chart.yAxis.stacked) {
                 //create stacked bar chart
@@ -99,38 +100,13 @@
             });
 
             //sort chart data
-            chart.data.sort(function(a, b) { return b.total - a.total; });
-
+            chart.data.sort(function (a, b) { return b.total - a.total; });
+            
             //check whether the axis is reversed
-            if (isReversed)
+            /*if (isReversed)
                 axis.x.domain([0, d3.max(chart.data, function (d) { return d.total; })]);
             else
-                axis.y.domain([0, d3.max(chart.data, function (d) { return d.total; })]);
-
-            //check whether the chart is reversed
-            if (isReversed) {
-                //update x axis
-                chart.svg.select('.eve-x-axis')
-                    .call(axis.xAxis)
-                    .selectAll('text')
-                    .style('fill', chart.xAxis.labelFontColor)
-                    .style('font-size', chart.xAxis.labelFontSize + 'px')
-                    .style('font-family', chart.xAxis.labelFontFamily)
-                    .style('font-style', chart.xAxis.labelFontStyle === 'bold' ? 'normal' : chart.yAxis.labelFontStyle)
-                    .style('font-weight', chart.xAxis.labelFontStyle === 'bold' ? 'bold' : 'normal')
-                    .style('stroke-width', '0px');
-            } else {
-                //update y axis
-                chart.svg.select('.eve-y-axis')
-                    .call(axis.yAxis)
-                    .selectAll('text')
-                    .style('fill', chart.yAxis.labelFontColor)
-                    .style('font-size', chart.yAxis.labelFontSize + 'px')
-                    .style('font-family', chart.yAxis.labelFontFamily)
-                    .style('font-style', chart.yAxis.labelFontStyle === 'bold' ? 'normal' : chart.yAxis.labelFontStyle)
-                    .style('font-weight', chart.yAxis.labelFontStyle === 'bold' ? 'bold' : 'normal')
-                    .style('stroke-width', '0px');
-            }
+                axis.y.domain([0, d3.max(chart.data, function (d) { return d.total; })]);*/
 
             //create stack bars on canvas
             stackedBars = chart.svg.selectAll('.eve-series')
@@ -189,11 +165,47 @@
                         .style('stroke-width', function (d) { return chart.series[i].strokeSize; });
                 });
 
+            //set serie labels
+            stackedBarsTexts = stackedBars.selectAll('text')
+                .data(function(d) { return d.values; })
+                .enter().append('text')
+                .attr('class', function(d, i) { return 'eve-bar-label eve-bar-label-' + i; })
+                .style('cursor', 'pointer')
+                .style('fill', function(d, i) { return chart.series[i].labelFontColor; })
+                .style('font-weight', function(d, i) { return chart.series[i].labelFontStyle == 'bold' ? 'bold' : 'normal'; })
+                .style('font-style', function(d, i) { return chart.series[i].labelFontStyle == 'bold' ? 'normal' : chart.series[i].labelFontStyle; })
+                .style("font-family", function(d, i) { return chart.series[i].labelFontFamily; })
+                .style("font-size", function(d, i) { return chart.series[i].labelFontSize + 'px'; })
+                .text(function(d, i) {
+                    //check whether the label format is enabled
+                    if(chart.series[i].labelFormat != '')
+                        return chart.getXYFormat(d, chart.series[i], 'label');
+                });
+
             //check whether the chart is reversed
-            if (isReversed)
+            if (isReversed) {
                 stackedBarsRects.attr('x', function (d) { return axis.x(d.y0); });
-            else
+                stackedBarsTexts
+                    .attr('x', function (d, i) {
+                        //return calculated x pos
+                        return axis.x(d.y0) + (axis.x(d.y1) - axis.x(d.y0)) - this.getBBox().width - 2;
+                    })
+                    .attr('y', function (d, i) {
+                        //return calculated y pos
+                        return axis.y.rangeBand() - 2;
+                    });
+            } else {
                 stackedBarsRects.attr('y', function (d) { return axis.y(d.y1); });
+                stackedBarsTexts
+                    .attr('x', function (d, i) {
+                        //return calculated x pos
+                        return (axis.x.rangeBand() / 2 - this.getBBox().width / 2);
+                    })
+                    .attr('y', function (d) {
+                        //return calculated y pos
+                        return axis.y(d.y1) + this.getBBox().height - 2;
+                    });
+            }
         }
 
         //creates grouped bar chart
@@ -284,6 +296,31 @@
                     //increase bullet stroke size
                     d3.select(this)
                         .style('stroke-width', function (d) { return chart.series[i].strokeSize; });
+                });
+
+            //set serie labels
+            groupedBarsTexts = groupedBars.selectAll('text')
+                .data(function(d) { return d.values; })
+                .enter().append('text')
+                .attr('class', function(d, i) { return 'eve-bar-label eve-bar-label-' + i; })
+                .style('cursor', 'pointer')
+                .style('fill', function(d, i) { return chart.series[i].labelFontColor; })
+                .style('font-weight', function(d, i) { return chart.series[i].labelFontStyle == 'bold' ? 'bold' : 'normal'; })
+                .style('font-style', function(d, i) { return chart.series[i].labelFontStyle == 'bold' ? 'normal' : chart.series[i].labelFontStyle; })
+                .style("font-family", function(d, i) { return chart.series[i].labelFontFamily; })
+                .style("font-size", function(d, i) { return chart.series[i].labelFontSize + 'px'; })
+                .text(function(d, i) {
+                    //check whether the label format is enabled
+                    if(chart.series[i].labelFormat != '')
+                        return chart.getXYFormat(d, chart.series[i], 'label');
+                })
+                .attr('x', function(d, i) {
+                    //return calculated x pos
+                    return isReversed ? (axis.offset.width - axis.x(d.yValue)) : (i * rangeBand);
+                })
+                .attr('y', function(d, i) {
+                    //return calculated y pos
+                    return isReversed ? groupAxis(d.name) + rangeBand : axis.y(d.yValue) - 2;
                 });
         }
 

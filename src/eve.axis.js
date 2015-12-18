@@ -26,10 +26,12 @@
         this.yAxis = null;
         this.series = null;
         this.serieNames = [];
+        this.xAxisDataType = 'numeric';
 
         //declare variables
         var that = this,
             xAxis, yAxis,
+            xAxisGrid, yAxisGrid,
             legendWidth = 0,
             isReversed = chart.type === 'bar',
             legendHeight = chart.series.length * (chart.legend.fontSize + 5),
@@ -44,6 +46,9 @@
         //set x Data Type as string if chart type is bar or column
         if(chart.type === 'bar' || chart.type === 'column')
             xDataType = 'string';
+        
+        //set x data type
+        this.xAxisDataType = xDataType;
 
         //decrease axis left and width if y axis title enabled
         axisLeft += chart.yAxis.titleFontSize;
@@ -61,7 +66,8 @@
 
         //map series with data
         that.series = that.serieNames.map(function(name, index) {
-            return {
+            //set data object
+            var dataObject = {
                 name: name,
                 serieType: chart.series[index].type,
                 values: chart.data.map(function(d) {
@@ -78,16 +84,19 @@
 
                     //set y value if set
                     if (serie.yField && e.getType(serie.yField) === 'string' && serie.yField !== '')
-                        dataObject.yValue = +parseFloat(d[name]);
+                        dataObject.yValue = parseFloat(d[name]);
 
                     //check whether the serie has size field
                     if (serie.sizeField && e.getType(serie.sizeField) === 'string' && serie.sizeField !== '')
-                        dataObject.sizeValue = +parseFloat(d[serie.sizeField]);
+                        dataObject.sizeValue = parseFloat(d[serie.sizeField]);
 
                     //return data object
                     return dataObject;
                 })
-            };
+            }
+
+            //return data object
+            return dataObject;
         });
 
         //create serie min
@@ -103,9 +112,29 @@
                 return parseFloat(v.yValue);
             });
         });
-
+        
+        //check chart type to set serie max
+        if (chart.type === 'area') {
+            //set max serie value
+            serieMax = d3.sum(that.series, function (c) {
+                return d3.max(c.values, function (v) {
+                    return parseFloat(v.yValue);
+                });
+            });
+        } else if (chart.type === 'bar' || chart.type === 'column') {
+            //check if axis is stacked
+            if (chart.yAxis.stacked) {
+                //set max serie value
+                serieMax = d3.sum(that.series, function (c) {
+                    return d3.max(c.values, function (v) {
+                        return parseFloat(v.yValue);
+                    });
+                });
+            }
+        }
+        
         //increase serie max by 10 percent
-        serieMax *= 1.1;
+        serieMax *= 1.25;
 
         //set serie min
         serieMin = chart.yAxis.startsFromZero ? 0 : serieMin;
@@ -134,15 +163,29 @@
             }
 
             //set y domains
-            yDomains.push(serieMin);
+            yDomains.push(0);
             yDomains.push(serieMax);
         });
 
         //get max text value
-        var maxValue = maxValues.max(),
+        var maxValue = d3.max(maxValues),
             minValue = minValues.min(),
             symbolSize = Math.pow(chart.legend.fontSize, 2);
-            maxValueLength = (maxValue.toString().length * chart.yAxis.labelFontSize / 2);
+        
+        //check chart type to set serie max
+        if (chart.type === 'area') {
+            //set max value
+            maxValue = d3.sum(maxValues);
+        } else if (chart.type === 'bar' || chart.type === 'column') {
+            //check if axis is stacked
+            if (chart.yAxis.stacked) {
+                //set max value
+                maxValue = d3.sum(maxValues);
+            }
+        }
+
+        //decllare max value length
+        var maxValueLength = (maxValue.toString().length * chart.yAxis.labelFontSize / 2);
 
         //check if reversed to set max val length
         if(isReversed) {
@@ -660,16 +703,19 @@
                     break;
                 case 'string':
                     {
+                        //declare domain array
+                        var domainArray = chart.data.map(function (d) {
+                            return d[chart.xField].toString();
+                        });
+                        
+                        //sort domain array
+                        domainArray.sort();
+
                         //create x axis domain
-                        if(isReversed) {
-                            that.y.domain(chart.data.map(function(d) {
-                                return d[chart.xField].toString();
-                            }));
-                        } else {
-                            that.x.domain(chart.data.map(function(d) {
-                                return d[chart.xField].toString();
-                            }));
-                        }
+                        if (isReversed)
+                            that.y.domain(domainArray);
+                        else
+                            that.x.domain(domainArray);
                     }
                     break;
                 default:
@@ -694,22 +740,28 @@
                 that.y.domain(yDomains);
 
             //create x axis grid lines
-            chart.svg.append('g')
+            xAxisGrid = chart.svg.append('g')
                 .attr('class', 'eve-x-grid')
                 .attr('transform', function () { return 'translate(' + axisLeft + ', ' + axisHeight + ')'; })
-                .style('stroke-opacity', chart.xAxis.gridLineAlpha)
-                .style('stroke-width', chart.xAxis.gridLineThickness)
-                .style('stroke', chart.xAxis.gridLineColor)
                 .call(createXAxis().tickSize(-axisHeight, 0, 0).tickFormat(''));
-
+            
+            //set x axis grid line style
+            xAxisGrid.selectAll('line')
+                .style('stroke-opacity', chart.xAxis.gridLineAlpha)
+                .style('stroke-width', chart.xAxis.gridLineThickness + 'px')
+                .style('stroke', chart.xAxis.gridLineColor);
+            
             //create y axis grid lines
-            chart.svg.append('g')
+            yAxisGrid = chart.svg.append('g')
                 .attr('class', 'eve-y-grid')
                 .attr('transform', function () { return 'translate(' + axisLeft + ')'; })
-                .style('stroke-opacity', chart.yAxis.gridLineAlpha)
-                .style('stroke-width', chart.yAxis.gridLineThickness)
-                .style('stroke', chart.yAxis.gridLineColor)
                 .call(createYAxis().tickSize(-axisWidth, 0, 0).tickFormat(''));
+            
+            //set y axis grid line style
+            yAxisGrid.selectAll('line')
+                .style('stroke-opacity', chart.yAxis.gridLineAlpha)
+                .style('stroke-width', chart.yAxis.gridLineThickness + 'px')
+                .style('stroke', chart.yAxis.gridLineColor);
 
             //create y axis
             yAxis = chart.svg.append('g')
@@ -745,7 +797,7 @@
                         else
                             return d;
                     } else {
-                        return d3.format(chart.yAxis.labelFormat)(d);    
+                        return d3.format(chart.yAxis.labelFormat)(d);
                     }
                 })
                 .attr('transform', function() {

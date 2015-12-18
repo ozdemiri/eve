@@ -14,17 +14,29 @@
 (function() {
     //declare eve method
     var eve = {
-        isIE: false || !!document.documentMode,
         colors: ['#83AA30', '#1499D3', '#4D6684', '#3D3D3D', '#B9340B', '#CEA45C', '#C5BE8B', '#498379', '#3F261C', '#E74700', '#F1E68F', '#FF976F', '#FF6464', '#554939', '#706C4D']
     };
 
     //loads localization settings
     eve.setLocale = function(locale) {
+        //set locale path
+        var localePath = 'locales/' + locale + '.json';
+
+        //check if directly localization name used
+        if(locale.indexOf('.json') == -1)
+            localePath = locale;
+
         //set eve localizaiton
-        d3.json('locales/' + locale + '.json', function() {
+        d3.json(localePath, function() {
             //set eve locale
             eve.consts = arguments[1];
         })
+    };
+
+    //sets eve charts colors
+    eve.setColors = function(colors) {
+        //set colors
+        eve.colors = colors;
     };
 
     //gets object type
@@ -241,7 +253,7 @@
     };
 
     //set default locale
-    eve.setLocale('en');
+    //eve.setLocale('en');
 
     //adds replaceall function to the string object.
     String.prototype.replaceAll = function (term, replacement) {

@@ -132,7 +132,7 @@
 
         //clear element content
         element.innerHTML = '';
-
+        
         //get element parent node
         parent = element.parentNode;
         offset = e.offset(parent);
@@ -326,7 +326,7 @@
             }
 
             //replace x value
-            if(xValue) {
+            if(xValue != null) {
                 if(e.getType(xValue) === 'date') {
                     content = content.replaceAll('{x}', dateFormatter(xValue));
                     content = content.replaceAll('{title}', dateFormatter(xValue));
@@ -340,13 +340,13 @@
             }
 
             //replace y value
-            if(yValue) {
+            if (!isNaN(parseFloat(yValue))) {
                 content = content.replaceAll('{y}', formatter(yValue));
                 content = content.replaceAll('{value}', formatter(yValue));
             }
 
             //replace size value
-            if(sizeValue)
+            if (!isNaN(parseFloat(sizeValue)))
                 content = content.replaceAll('{size}', formatter(sizeValue));
 
             //replace serie

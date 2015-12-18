@@ -10,7 +10,16 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
     <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
-    <script src="eve-min.js"></script>
+    <script src="src/eve.js"></script>
+    <script src="src/eve.charts.js"></script>
+    <script src="src/eve.axis.js"></script>
+    <script src="src/eve.pie.js"></script>
+    <script src="src/eve.funnel.js"></script>
+    <script src="src/eve.line.js"></script>
+    <script src="src/eve.scatter.js"></script>
+    <script src="src/eve.bubble.js"></script>
+    <script src="src/eve.area.js"></script>
+    <script src="src/eve.bar.js"></script>
     <script src="libs/index.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" />
     <link rel="stylesheet" href="libs/font-awesome/css/font-awesome.min.css" />
@@ -488,108 +497,106 @@ eve.areaChart({
                 </thead>
                 <tbody>
                     <tr>
-                        <tr>
-                            <td>alpha</td>
-                            <td>number</td>
-                            <td>Sets area opacity.</td>
-                            <td>0.7</td>
-                        </tr>
-                        <tr>
-                            <td>bullet</td>
-                            <td>string</td>
-                            <td>Sets bullet style of the serie. Available values are; none, circle, square, cross, diamond, triangle-down, triangle-up.</td>
-                            <td>none</td>
-                        </tr>
-                        <tr>
-                            <td>bulletAlpha</td>
-                            <td>number</td>
-                            <td>Sets bullet opacity.</td>
-                            <td>0.5</td>
-                        </tr>
-                        <tr>
-                            <td>bulletColor</td>
-                            <td>string</td>
-                            <td>Sets bullet fill color. Uses serie color if not set.</td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td>bulletSize</td>
-                            <td>number</td>
-                            <td>Sets bullet size.</td>
-                            <td>8</td>
-                        </tr>
-                        <tr>
-                            <td>bulletStrokeSize</td>
-                            <td>number</td>
-                            <td>Sets bullet stroke size.</td>
-                            <td>1</td>
-                        </tr>
-                        <tr>
-                            <td>bulletStrokeAlpha</td>
-                            <td>number</td>
-                            <td>Sets bullet stroke opacity.</td>
-                            <td>1</td>
-                        </tr>
-                        <tr>
-                            <td>color</td>
-                            <td>string</td>
-                            <td>Sets serie color. Uses default EVE chart colors if not set.</td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td>dateFormat</td>
-                            <td>string</td>
-                            <td>Sets date format for the date-based serie value. Learn more about date formatting at <a href="https://github.com/mbostock/d3/wiki/Time-Formatting" target="_blank">D3.js time formatting.</a></td>
-                            <td>%m/%d/%Y</td>
-                        </tr>
-                        <tr>
-                            <td>labelFontColor</td>
-                            <td>string</td>
-                            <td>Sets serie labels font color.</td>
-                            <td>#999999</td>
-                        </tr>
-                        <tr>
-                            <td>labelFontFamily</td>
-                            <td>string</td>
-                            <td>Sets serie labels font family.</td>
-                            <td>Tahoma</td>
-                        </tr>
-                        <tr>
-                            <td>labelFontSize</td>
-                            <td>number</td>
-                            <td>Sets serie labels font size.</td>
-                            <td>10</td>
-                        </tr>
-                        <tr>
-                            <td>labelFontStyle</td>
-                            <td>string</td>
-                            <td>Sets serie labels font style. Available values; normal, bold, italic.</td>
-                            <td>normal</td>
-                        </tr>
-                        <tr>
-                            <td>labelFormat</td>
-                            <td>string</td>
-                            <td>Sets serie label format. You can place data values by the keywords into labels. Available data keywords; {title}, {value}, {x}, {y}, {size}.</td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td>numberFormat</td>
-                            <td>string</td>
-                            <td>Sets number format for the number-based serie value. Learn more about number formatting at <a href="https://github.com/mbostock/d3/wiki/Formatting" target="_blank">D3.js number formatting.</a></td>
-                            <td>%m/%d/%Y</td>
-                        </tr>
-                        <tr>
-                            <td>title</td>
-                            <td>string</td>
-                            <td>Sets serie title.</td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td>yField</td>
-                            <td>string</td>
-                            <td>Sets serie Y field name.</td>
-                            <td></td>
-                        </tr>
+                        <td>alpha</td>
+                        <td>number</td>
+                        <td>Sets area opacity.</td>
+                        <td>0.7</td>
+                    </tr>
+                    <tr>
+                        <td>bullet</td>
+                        <td>string</td>
+                        <td>Sets bullet style of the serie. Available values are; none, circle, square, cross, diamond, triangle-down, triangle-up.</td>
+                        <td>none</td>
+                    </tr>
+                    <tr>
+                        <td>bulletAlpha</td>
+                        <td>number</td>
+                        <td>Sets bullet opacity.</td>
+                        <td>0.5</td>
+                    </tr>
+                    <tr>
+                        <td>bulletColor</td>
+                        <td>string</td>
+                        <td>Sets bullet fill color. Uses serie color if not set.</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>bulletSize</td>
+                        <td>number</td>
+                        <td>Sets bullet size.</td>
+                        <td>8</td>
+                    </tr>
+                    <tr>
+                        <td>bulletStrokeSize</td>
+                        <td>number</td>
+                        <td>Sets bullet stroke size.</td>
+                        <td>1</td>
+                    </tr>
+                    <tr>
+                        <td>bulletStrokeAlpha</td>
+                        <td>number</td>
+                        <td>Sets bullet stroke opacity.</td>
+                        <td>1</td>
+                    </tr>
+                    <tr>
+                        <td>color</td>
+                        <td>string</td>
+                        <td>Sets serie color. Uses default EVE chart colors if not set.</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>dateFormat</td>
+                        <td>string</td>
+                        <td>Sets date format for the date-based serie value. Learn more about date formatting at <a href="https://github.com/mbostock/d3/wiki/Time-Formatting" target="_blank">D3.js time formatting.</a></td>
+                        <td>%m/%d/%Y</td>
+                    </tr>
+                    <tr>
+                        <td>labelFontColor</td>
+                        <td>string</td>
+                        <td>Sets serie labels font color.</td>
+                        <td>#999999</td>
+                    </tr>
+                    <tr>
+                        <td>labelFontFamily</td>
+                        <td>string</td>
+                        <td>Sets serie labels font family.</td>
+                        <td>Tahoma</td>
+                    </tr>
+                    <tr>
+                        <td>labelFontSize</td>
+                        <td>number</td>
+                        <td>Sets serie labels font size.</td>
+                        <td>10</td>
+                    </tr>
+                    <tr>
+                        <td>labelFontStyle</td>
+                        <td>string</td>
+                        <td>Sets serie labels font style. Available values; normal, bold, italic.</td>
+                        <td>normal</td>
+                    </tr>
+                    <tr>
+                        <td>labelFormat</td>
+                        <td>string</td>
+                        <td>Sets serie label format. You can place data values by the keywords into labels. Available data keywords; {title}, {value}, {x}, {y}, {size}.</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>numberFormat</td>
+                        <td>string</td>
+                        <td>Sets number format for the number-based serie value. Learn more about number formatting at <a href="https://github.com/mbostock/d3/wiki/Formatting" target="_blank">D3.js number formatting.</a></td>
+                        <td>%m/%d/%Y</td>
+                    </tr>
+                    <tr>
+                        <td>title</td>
+                        <td>string</td>
+                        <td>Sets serie title.</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>yField</td>
+                        <td>string</td>
+                        <td>Sets serie Y field name.</td>
+                        <td></td>
                     </tr>
                 </tbody>
             </table>
@@ -690,78 +697,253 @@ eve.columnChart({
                 </thead>
                 <tbody>
                     <tr>
-                        <tr>
-                            <td>alpha</td>
-                            <td>number</td>
-                            <td>Sets bar opacity.</td>
-                            <td>1</td>
-                        </tr>
-                        <tr>
-                            <td>color</td>
-                            <td>string</td>
-                            <td>Sets serie color. Uses default EVE chart colors if not set.</td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td>dateFormat</td>
-                            <td>string</td>
-                            <td>Sets date format for the date-based serie value. Learn more about date formatting at <a href="https://github.com/mbostock/d3/wiki/Time-Formatting" target="_blank">D3.js time formatting.</a></td>
-                            <td>%m/%d/%Y</td>
-                        </tr>
-                        <tr>
-                            <td>labelFontColor</td>
-                            <td>string</td>
-                            <td>Sets serie labels font color.</td>
-                            <td>#999999</td>
-                        </tr>
-                        <tr>
-                            <td>labelFontFamily</td>
-                            <td>string</td>
-                            <td>Sets serie labels font family.</td>
-                            <td>Tahoma</td>
-                        </tr>
-                        <tr>
-                            <td>labelFontSize</td>
-                            <td>number</td>
-                            <td>Sets serie labels font size.</td>
-                            <td>10</td>
-                        </tr>
-                        <tr>
-                            <td>labelFontStyle</td>
-                            <td>string</td>
-                            <td>Sets serie labels font style. Available values; normal, bold, italic.</td>
-                            <td>normal</td>
-                        </tr>
-                        <tr>
-                            <td>labelFormat</td>
-                            <td>string</td>
-                            <td>Sets serie label format. You can place data values by the keywords into labels. Available data keywords; {title}, {value}, {x}, {y}, {size}.</td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td>numberFormat</td>
-                            <td>string</td>
-                            <td>Sets number format for the number-based serie value. Learn more about number formatting at <a href="https://github.com/mbostock/d3/wiki/Formatting" target="_blank">D3.js number formatting.</a></td>
-                            <td>%m/%d/%Y</td>
-                        </tr>
-                        <tr>
-                            <td>strokeSize</td>
-                            <td>number</td>
-                            <td>Sets bar stroke size.</a></td>
-                            <td>1</td>
-                        </tr>
-                        <tr>
-                            <td>title</td>
-                            <td>string</td>
-                            <td>Sets serie title.</td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td>yField</td>
-                            <td>string</td>
-                            <td>Sets serie Y field name.</td>
-                            <td></td>
-                        </tr>
+                        <td>alpha</td>
+                        <td>number</td>
+                        <td>Sets bar opacity.</td>
+                        <td>1</td>
+                    </tr>
+                    <tr>
+                        <td>color</td>
+                        <td>string</td>
+                        <td>Sets serie color. Uses default EVE chart colors if not set.</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>dateFormat</td>
+                        <td>string</td>
+                        <td>Sets date format for the date-based serie value. Learn more about date formatting at <a href="https://github.com/mbostock/d3/wiki/Time-Formatting" target="_blank">D3.js time formatting.</a></td>
+                        <td>%m/%d/%Y</td>
+                    </tr>
+                    <tr>
+                        <td>labelFontColor</td>
+                        <td>string</td>
+                        <td>Sets serie labels font color.</td>
+                        <td>#999999</td>
+                    </tr>
+                    <tr>
+                        <td>labelFontFamily</td>
+                        <td>string</td>
+                        <td>Sets serie labels font family.</td>
+                        <td>Tahoma</td>
+                    </tr>
+                    <tr>
+                        <td>labelFontSize</td>
+                        <td>number</td>
+                        <td>Sets serie labels font size.</td>
+                        <td>10</td>
+                    </tr>
+                    <tr>
+                        <td>labelFontStyle</td>
+                        <td>string</td>
+                        <td>Sets serie labels font style. Available values; normal, bold, italic.</td>
+                        <td>normal</td>
+                    </tr>
+                    <tr>
+                        <td>labelFormat</td>
+                        <td>string</td>
+                        <td>Sets serie label format. You can place data values by the keywords into labels. Available data keywords; {title}, {value}, {x}, {y}, {size}.</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>numberFormat</td>
+                        <td>string</td>
+                        <td>Sets number format for the number-based serie value. Learn more about number formatting at <a href="https://github.com/mbostock/d3/wiki/Formatting" target="_blank">D3.js number formatting.</a></td>
+                        <td>%m/%d/%Y</td>
+                    </tr>
+                    <tr>
+                        <td>strokeSize</td>
+                        <td>number</td>
+                        <td>Sets bar stroke size.</a></td>
+                        <td>1</td>
+                    </tr>
+                    <tr>
+                        <td>title</td>
+                        <td>string</td>
+                        <td>Sets serie title.</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>yField</td>
+                        <td>string</td>
+                        <td>Sets serie Y field name.</td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-lg-12">
+            <a name="line"></a>
+            <h2>Creating a Line Chart</h2>
+        <p>To create an EVE chart, you need a container element which will contain the chart.</p>
+<pre class="prettyprint lang-html">
+&lt;div id="dvLineChart"&gt;&lt;/div&gt;
+</pre>
+            <p>Once the container is defined, we are ready to create a chart in it. </p>
+            <div class="col-md-6 chartArea">
+<pre class="prettyprint lang-js">
+eve.lineChart({
+    container: 'dvLineChart',
+    data: dataXY,
+    xField: 'id',
+    series: [
+        { yField: 'salary' },
+        { yField: 'bonus' }
+    ],
+    yAxis: { title: 'Salary vs Bonus' }
+});
+</pre>
+            </div>
+            <div class="col-md-6 chartArea">
+                <div id="dvLineChart"></div>
+            </div>
+            <h3>Line Serie Options</h3>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th style="width: 15%;">Property</th>
+                        <th style="width: 10%;">Type</th>
+                        <th style="width: 65%;">Description</th>
+                        <th style="width: 10%;">Default Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>alpha</td>
+                        <td>number</td>
+                        <td>Sets area opacity.</td>
+                        <td>0.7</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-lg-12">
+            <a name="scatter"></a>
+            <h2>Creating a Scatter Chart</h2>
+        <p>To create an EVE chart, you need a container element which will contain the chart.</p>
+<pre class="prettyprint lang-html">
+&lt;div id="dvScatterChart"&gt;&lt;/div&gt;
+</pre>
+            <p>Once the container is defined, we are ready to create a chart in it. </p>
+            <div class="col-md-6 chartArea">
+<pre class="prettyprint lang-js">
+eve.scatterChart({
+    container: 'dvScatterChart',
+    data: dataXY,
+    xField: 'id',
+    series: [
+        { yField: 'salary' },
+        { yField: 'bonus' }
+    ],
+    yAxis: { title: 'Salary vs Bonus' }
+});
+</pre>
+            </div>
+            <div class="col-md-6 chartArea">
+                <div id="dvScatterChart"></div>
+            </div>
+            <h3>Scatter Serie Options</h3>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th style="width: 15%;">Property</th>
+                        <th style="width: 10%;">Type</th>
+                        <th style="width: 65%;">Description</th>
+                        <th style="width: 10%;">Default Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>alpha</td>
+                        <td>number</td>
+                        <td>Sets area opacity.</td>
+                        <td>0.7</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-lg-12">
+            <a name="bubble"></a>
+            <h2>Creating a Bubble Chart</h2>
+        <p>To create an EVE chart, you need a container element which will contain the chart.</p>
+<pre class="prettyprint lang-html">
+&lt;div id="dvBubbleChart"&gt;&lt;/div&gt;
+</pre>
+            <p>Once the container is defined, we are ready to create a chart in it. </p>
+            <div class="col-md-6 chartArea">
+<pre class="prettyprint lang-js">
+eve.bubbleChart({
+    container: 'dvBubbleChart',
+    data: dataXY,
+    xField: 'id',
+    series: [
+        { yField: 'salary', sizeField: 'annualExtra' },
+        { yField: 'bonus', sizeField: 'annualExtra' }
+    ],
+    yAxis: { title: 'Salary vs Bonus' }
+});
+</pre>
+            </div>
+            <div class="col-md-6 chartArea">
+                <div id="dvBubbleChart"></div>
+            </div>
+            <h3>Scatter Serie Options</h3>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th style="width: 15%;">Property</th>
+                        <th style="width: 10%;">Type</th>
+                        <th style="width: 65%;">Description</th>
+                        <th style="width: 10%;">Default Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>alpha</td>
+                        <td>number</td>
+                        <td>Sets area opacity.</td>
+                        <td>0.7</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-lg-12">
+            <a name="bubble"></a>
+            <h2>Creating a Pyramid Chart</h2>
+        <p>To create an EVE chart, you need a container element which will contain the chart.</p>
+<pre class="prettyprint lang-html">
+&lt;div id="dvPyramidChart"&gt;&lt;/div&gt;
+</pre>
+            <p>Once the container is defined, we are ready to create a chart in it. </p>
+            <div class="col-md-6 chartArea">
+<pre class="prettyprint lang-js">
+eve.pyramidChart({
+    container: 'dvPyramidChart',
+    data: dataSliced,
+    series: [
+        { titleField: 'state', valueField: 'salary' }
+    ]
+});
+</pre>
+            </div>
+            <div class="col-md-6 chartArea">
+                <div id="dvPyramidChart"></div>
+            </div>
+            <h3>Scatter Serie Options</h3>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th style="width: 15%;">Property</th>
+                        <th style="width: 10%;">Type</th>
+                        <th style="width: 65%;">Description</th>
+                        <th style="width: 10%;">Default Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>alpha</td>
+                        <td>number</td>
+                        <td>Sets area opacity.</td>
+                        <td>0.7</td>
                     </tr>
                 </tbody>
             </table>

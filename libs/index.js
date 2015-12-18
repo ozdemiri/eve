@@ -21,13 +21,16 @@ $(document).ready(function() {
             dataXY = rows;
 
             //set sliced data
-            for(var i=0; i<7; i++)
+            for(var i=0; i<8; i++)
                 dataSliced.push(eve.clone(rows[i]));
 
             //draw area chart
             drawArea();
-            drawBar();
             drawLine();
+            drawScatter();
+            drawBubble();
+            drawPyramid();
+            drawBar();
         })
 });
 
@@ -55,6 +58,42 @@ function drawLine() {
             { yField: 'bonus' }
         ],
         yAxis: { title: 'Salary vs Bonus' }
+    });
+}
+
+function drawScatter() {
+    eve.scatterChart({
+        container: 'dvScatterChart',
+        data: dataXY,
+        xField: 'id',
+        series: [
+            { yField: 'salary' },
+            { yField: 'bonus' }
+        ],
+        yAxis: { title: 'Salary vs Bonus' }
+    });
+}
+
+function drawBubble() {
+    eve.bubbleChart({
+        container: 'dvBubbleChart',
+        data: dataXY,
+        xField: 'id',
+        series: [
+            { yField: 'salary', sizeField: 'annualExtra' },
+            { yField: 'bonus', sizeField: 'annualExtra' }
+        ],
+        yAxis: { title: 'Salary vs Bonus' }
+    });
+}
+
+function drawPyramid() {
+    eve.pyramidChart({
+        container: 'dvPyramidChart',
+        data: dataSliced,
+        series: [
+            { titleField: 'state', valueField: 'salary' }
+        ]
     });
 }
 

@@ -12,5 +12,8 @@
   "bugs": {
     "url": "https://github.com/eveui/eve/issues"
   },
-  "homepage": "https://github.com/eveui/eve#readme"
+  "homepage": "https://github.com/eveui/eve#readme",
+  "dependencies": {
+      "d3": "^3.5.8",
+  }
 }
