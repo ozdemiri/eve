@@ -22,9 +22,9 @@
         bulletStrokeAlpha: 1,
         color: '',
         dateFormat: '',
-        labelFontColor: '#ffffff',
+        labelFontColor: '#333333',
         labelFontFamily: 'Tahoma',
-        labelFontSize: 11,
+        labelFontSize: 10,
         labelFontStyle: 'normal',
         labelFormat: '',
         maxBulletSize: 50,
@@ -108,11 +108,62 @@
                 .enter().append('g')
                 .attr('class', 'eve-series');
 
+            //set serie labels
+            bubbleSeries.selectAll('.eve-bubble-label')
+                .data(function(d) { return d.values; })
+                .enter().append('text')
+                .attr('class', function (d, i) {
+                    return 'eve-bubble-label eve-bubble-label-' + i;
+                })
+                .style('cursor', 'pointer')
+                .style('fill', function(d, i) { return chart.series[d.index].labelFontColor; })
+                .style('font-weight', function(d, i) { return chart.series[d.index].labelFontStyle == 'bold' ? 'bold' : 'normal'; })
+                .style('font-style', function(d, i) { return chart.series[d.index].labelFontStyle == 'bold' ? 'normal' : chart.series[d.index].labelFontStyle; })
+                .style("font-family", function(d, i) { return chart.series[d.index].labelFontFamily; })
+                .style("font-size", function(d, i) { return chart.series[d.index].labelFontSize + 'px'; })
+                .style('text-anchor', 'middle')
+                .text(function(d, i) {
+                    //check whether the label format is enabled
+                    if(chart.series[d.index].labelFormat != '')
+                        return chart.getXYFormat(d, chart.series[d.index], 'label');
+                })
+                .attr('transform', function(d) {
+                    //get axis serie
+                    var chartSerie = chart.series[d.index];
+                    var axisSerie = axis.series[d.index];
+                    var labelHeightPos = 0;
+                    var bulletSize = 0;
+
+                    //check whether the chartSerie has sizeField
+                    if (chartSerie.sizeField !== '') {
+                        //calculate bullet size
+                        var axisSerieRange = axisSerie.maxSize - axisSerie.minSize,
+                            chartSerieRange = chartSerie.maxBulletSize - chartSerie.minBulletSize;
+                    
+                        //set bullet size
+                        bulletSize = d.sizeValue / axisSerieRange * chartSerieRange - (axisSerie.minSize / axisSerieRange * chartSerieRange) + chartSerie.minBulletSize;
+
+                        //return calculated bullet size
+                        labelHeightPos = bulletSize / 2;
+                    } else {
+                        //return default bullet size
+                        labelHeightPos = chartSerie.bulletSize / 2;
+                    }
+
+                    //return translated label positions
+                    return 'translate(' + (axis.x(d.xValue) + axis.offset.left) + ',' + (axis.y(d.yValue) - labelHeightPos - (chart.series[d.index].labelFontSize / 2) - bulletSize) + ')';
+                });
+
             //append serie points
             bubbleSeries.selectAll('.eve-bubble-point')
                 .data(function (d) { return d.values; })
                 .enter().append('path')
-                .attr('class', function (d, i) { return 'eve-bubble-point eve-bubble-point-' + d.index; })
+                .attr('class', function (d, i) {
+                    if (d.yValue === 0)
+                        return 'eve-bubble-point-null eve-bubble-point-null-' + d.index;
+                    else
+                        return 'eve-bubble-point eve-bubble-point-' + d.index;
+                })
                 .attr('d', function (d) { return bulletF(d); })
                 .style('cursor', 'pointer')
                 .style('fill', function (d) {
@@ -126,11 +177,39 @@
                         return chart.series[d.index].color;
                 })
                 .style('stroke-width', function (d) { return chart.series[d.index].bulletStrokeSize + 'px'; })
-                .style('stroke-opacity', function (d) { return chart.series[d.index].bulletStrokeAlpha; })
+                .style('stroke-opacity', function (d) {
+                    if (d.yValue === 0) return 0;
+                    return chart.series[d.index].bulletStrokeAlpha;
+                })
                 .style('stroke-dasharray', 0)
-                .style('fill-opacity', function (d) { return chart.series[d.index].bulletAlpha; })
-                .attr('transform', function (d) { return 'translate(' + (axis.x(d.xValue) + axis.offset.left) + ',' + axis.y(d.yValue) + ')'; })
-                .on('mousemove', function(d, i) {
+                .style('fill-opacity', function (d) {
+                    if (d.yValue === 0) return 0;
+                    return chart.series[d.index].bulletAlpha;
+                })
+                .attr('transform', function (d) {
+                    //declare needed variables
+                    var chartSerie = chart.series[d.index];
+                    var axisSerie = axis.series[d.index];
+                    var bulletSize = 0;
+                
+                    //check size field
+                    if (chartSerie.sizeField !== '') {
+                        //calculate bullet size
+                        var axisSerieRange = axisSerie.maxSize - axisSerie.minSize,
+                            chartSerieRange = chartSerie.maxBulletSize - chartSerie.minBulletSize;
+                    
+                        //set bullet size
+                        bulletSize = d.sizeValue / axisSerieRange * chartSerieRange - (axisSerie.minSize / axisSerieRange * chartSerieRange) + chartSerie.minBulletSize;
+                    }
+                
+                    //check x axis data type
+                    if(axis.xAxisDataType === 'string')
+                        return 'translate(' + (axis.x(d.xValue) + axis.offset.left + (axis.x.rangeBand() / 2)) + ',' + (axis.y(d.yValue) - bulletSize / 2) + ')';
+                    else
+                        return 'translate(' + (axis.x(d.xValue) + axis.offset.left) + ',' + (axis.y(d.yValue) - bulletSize / 2) + ')';
+                })
+                .on('mousemove', function (d, i) {
+                    if (d.yValue === 0) return null;
                     var balloonContent = chart.getXYFormat(d, chart.series[d.index]);
 
                     //show balloon

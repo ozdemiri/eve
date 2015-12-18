@@ -23,9 +23,9 @@
         bulletStrokeAlpha: 1,
         color: '',
         dateFormat: '',
-        labelFontColor: '#ffffff',
+        labelFontColor: '#333333',
         labelFontFamily: 'Tahoma',
-        labelFontSize: 11,
+        labelFontSize: 10,
         labelFontStyle: 'normal',
         labelFormat: '',
         numberFormat: '',
@@ -46,14 +46,14 @@
             //extend current serie with defaults
             e.extend(options.series[i], defaults);
         }
-
+        
         //create chart
         var that = this,
             chart = e.charts.init(options),
             axis = e.charts.createAxis(chart),
-            areaSeries, bulletSeries,
+            areaSeries, bulletSeries, labelSeries,
             areaF, bulletF, stackF;
-
+        
         //handles zoom
         var zoom = d3.behavior.zoom().x(axis.x).y(axis.y).on("zoom", zoomHandler);
         function zoomHandler() {
@@ -84,26 +84,27 @@
         function init() {
             //create stack function
             stackF = d3.layout.stack()
-                .values(function(d) { return d.values; })
-                .x(function(d) { return axis.x(d.xValue); })
-                .y(function(d) { return axis.y(d.yValue); });
+                .values(function (d) { return d.values; })
+                .x(function (d) { return d.xValue; })
+                .y(function (d) { return d.yValue; });
 
             //stack series
             stackF(axis.series);
 
-            //update axis domain
-            axis.y.domain([
-                0,
-                d3.max(axis.series, function (d) {
-                    return d3.max(d.values, function (d2) { return d2.y0 + d2.y; });
-                })
-            ]);
-
             //create area function
             areaF = d3.svg.area()
-                .x(function(d) { return axis.x(d.xValue); })
-                .y0(function(d) { return axis.y(d.y0); })
-                .y1(function(d) { return axis.y(d.y0 + d.y); });
+                .x(function (d) {
+                    if (axis.xAxisDataType === 'string')
+                        return axis.x(d.xValue) + axis.x.rangeBand() / 2;
+                    else
+                        return axis.x(d.xValue);
+                })
+                .y0(function (d) {
+                    return axis.y(d.y0);
+                })
+                .y1(function (d) {
+                    return axis.y(d.y0 + d.y);
+                });
 
             //create bullet function
             bulletF = d3.svg.symbol().type(function (d) {
@@ -126,7 +127,7 @@
             areaSeries.append('path')
                 .attr('class', function (d, i) { return 'eve-area-serie eve-area-serie-' + i; })
                 .attr('d', function (d, i) {
-                    //return line function
+                    //return area function
                     return areaF(d.values);
                 })
                 .attr('transform', 'translate(' + axis.offset.left + ')')
@@ -148,6 +149,34 @@
                         return chart.series[i].color;
                 });
 
+            //append serie labels
+            labelSeries = areaSeries.selectAll('.eve-area-labels')
+                .data(axis.series)
+                .enter().append('g')
+                .attr('class', 'eve-area-labels');
+
+            //set serie labels
+            labelSeries.selectAll('.eve-area-label')
+                .data(function(d) { return d.values; })
+                .enter().append('text')
+                .attr('class', function(d) { return 'eve-area-label eve-area-label-' + d.index; })
+                .style('cursor', 'pointer')
+                .style('fill', function(d) { return chart.series[d.index].labelFontColor; })
+                .style('font-weight', function(d) { return chart.series[d.index].labelFontStyle == 'bold' ? 'bold' : 'normal'; })
+                .style('font-style', function(d) { return chart.series[d.index].labelFontStyle == 'bold' ? 'normal' : chart.series[d.index].labelFontStyle; })
+                .style("font-family", function(d) { return chart.series[d.index].labelFontFamily; })
+                .style("font-size", function(d) { return chart.series[d.index].labelFontSize + 'px'; })
+                .style('text-anchor', 'middle')
+                .text(function(d, i) {
+                    //check whether the label format is enabled
+                    if(chart.series[d.index].labelFormat != '')
+                        return chart.getXYFormat(d, chart.series[d.index], 'label');
+                })
+                .attr('transform', function(d) {
+                    //return translated label positions
+                    return 'translate(' + (axis.x(d.xValue) + axis.offset.left) + ',' + axis.y(d.y0 + d.y) + ')';
+                });
+
             //append serie points
             bulletSeries = areaSeries.selectAll('.eve-area-points')
                 .data(axis.series)
@@ -161,9 +190,7 @@
                 .attr('class', function (d, i) { return 'eve-area-point eve-are-point-' + d.index; })
                 .attr('d', bulletF)
                 .style('cursor', 'pointer')
-                .style('fill', function (d) {
-                    return '#ffffff';
-                })
+                .style('fill', '#ffffff')
                 .style('stroke', function (d) {
                     //check whether the serie has color
                     if (chart.series[d.index].color === '')
@@ -175,9 +202,12 @@
                 .style('stroke-opacity', 0)
                 .style('fill-opacity', 0)
                 .attr('transform', function (d) {
-                    return 'translate(' + (axis.x(d.xValue) + axis.offset.left) + ',' + axis.y(d.y0 + d.y) + ')';
+                    if(axis.xAxisDataType === 'string')
+                        return 'translate(' + (axis.x(d.xValue) + axis.offset.left + (axis.x.rangeBand() / 2)) + ',' + axis.y(d.y0 + d.y) + ')';
+                    else
+                        return 'translate(' + (axis.x(d.xValue) + axis.offset.left) + ',' + axis.y(d.y0 + d.y) + ')';
                 })
-                .on('mousemove', function(d, i) {
+                .on('mousemove', function (d, i) {
                     var balloonContent = chart.getXYFormat(d, chart.series[d.index]);
 
                     //show balloon

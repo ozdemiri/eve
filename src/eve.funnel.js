@@ -146,7 +146,10 @@
                                 .duration(chart.animationDuration / 2)
                                 .attr('transform', function () {
                                     //return translation
-                                    return 'translate(10)';
+                                    if(isPyramid)
+                                        return 'translate(' + (funnelWidth + 10) + ',' + funnelHeight + ')rotate(180)';
+                                    else
+                                        return 'translate(10)';
                                 });
 
                             //check index
@@ -165,7 +168,10 @@
                                 .duration(chart.animationDuration / 2)
                                 .attr('transform', function () {
                                     //return translation
-                                    return 'translate(0)';
+                                    if(isPyramid)
+                                        return 'translate(' + funnelWidth + ',' + funnelHeight + ')rotate(180)';
+                                    else
+                                        return 'translate(0)';
                                 });
 
                             //check index
@@ -216,7 +222,10 @@
                                 .duration(chart.animationDuration / 2)
                                 .attr('transform', function () {
                                     //return translation
-                                    return 'translate(10)';
+                                    if(isPyramid)
+                                        return 'translate(' + (funnelWidth + 10) + ',' + funnelHeight + ')rotate(180)';
+                                    else
+                                        return 'translate(10)';
                                 });
 
                             //check index
@@ -235,7 +244,10 @@
                                 .duration(chart.animationDuration / 2)
                                 .attr('transform', function () {
                                     //return translation
-                                    return 'translate(0)';
+                                    if(isPyramid)
+                                        return 'translate(' + funnelWidth + ',' + funnelHeight + ')rotate(180)';
+                                    else
+                                        return 'translate(0)';
                                 });
 
                             //check index
@@ -310,7 +322,10 @@
                             .duration(chart.animationDuration / 2)
                             .attr('transform', function () {
                                 //return translation
-                                return 'translate(10)';
+                                if(isPyramid)
+                                    return 'translate(' + (funnelWidth + 10) + ',' + funnelHeight + ')rotate(180)';
+                                else
+                                    return 'translate(10)';
                             });
 
                         //check index
@@ -329,7 +344,10 @@
                             .duration(chart.animationDuration / 2)
                             .attr('transform', function () {
                                 //return translation
-                                return 'translate(0)';
+                                if(isPyramid)
+                                    return 'translate(' + funnelWidth + ',' + funnelHeight + ')rotate(180)';
+                                else
+                                    return 'translate(0)';
                             });
 
                         //check index

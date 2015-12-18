@@ -24,9 +24,9 @@
         color: '',
         dateFormat: '',
         drawingStyle: 'solid', //solid, dashed, dotted
-        labelFontColor: '#ffffff',
+        labelFontColor: '#333333',
         labelFontFamily: 'Tahoma',
-        labelFontSize: 11,
+        labelFontSize: 10,
         labelFontStyle: 'normal',
         labelFormat: '',
         lineAlpha: 1,
@@ -98,7 +98,12 @@
         function init() {
             //create line function
             lineF = d3.svg.line()
-                .x(function(d) { return axis.x(d.xValue); })
+                .x(function(d) { 
+                    if(axis.xAxisDataType === 'string')
+                        return axis.x(d.xValue) + axis.x.rangeBand() / 2;
+                    else
+                        return axis.x(d.xValue); 
+                })
                 .y(function(d) { return axis.y(d.yValue); });
 
             //create bullet function
@@ -152,6 +157,28 @@
                         return chart.series[i].color;
                 });
 
+            //set serie labels
+            lineSeries.selectAll('.eve-line-label')
+                .data(function(d) { return d.values; })
+                .enter().append('text')
+                .attr('class', function(d, i) { return 'eve-line-label eve-line-label-' + i; })
+                .style('cursor', 'pointer')
+                .style('fill', function(d, i) { return chart.series[d.index].labelFontColor; })
+                .style('font-weight', function(d, i) { return chart.series[d.index].labelFontStyle == 'bold' ? 'bold' : 'normal'; })
+                .style('font-style', function(d, i) { return chart.series[d.index].labelFontStyle == 'bold' ? 'normal' : chart.series[d.index].labelFontStyle; })
+                .style("font-family", function(d, i) { return chart.series[d.index].labelFontFamily; })
+                .style("font-size", function(d, i) { return chart.series[d.index].labelFontSize + 'px'; })
+                .style('text-anchor', 'middle')
+                .text(function(d, i) {
+                    //check whether the label format is enabled
+                    if(chart.series[d.index].labelFormat != '')
+                        return chart.getXYFormat(d, chart.series[d.index], 'label');
+                })
+                .attr('transform', function(d) {
+                    //return translated label positions
+                    return 'translate(' + (axis.x(d.xValue) + axis.offset.left) + ',' + (axis.y(d.yValue) - chart.series[d.index].bulletSize) + ')';
+                });
+
             //append serie points
             lineBullets = lineSeries.selectAll('.eve-line-point')
                 .data(function (d) { return d.values; })
@@ -177,10 +204,15 @@
                 .style('stroke-width', function (d) { return chart.series[d.index].bulletStrokeSize + 'px'; })
                 .style('stroke-opacity', 0)
                 .style('fill-opacity', 0)
-                .attr('transform', function (d) { return 'translate(' + (axis.x(d.xValue) + axis.offset.left) + ',' + axis.y(d.yValue) + ')'; })
-                .on('mousemove', function(d, i) {
+                .attr('transform', function (d) {
+                    if(axis.xAxisDataType === 'string')
+                        return 'translate(' + (axis.x(d.xValue) + axis.offset.left + (axis.x.rangeBand() / 2)) + ',' + axis.y(d.yValue) + ')';
+                    else
+                        return 'translate(' + (axis.x(d.xValue) + axis.offset.left) + ',' + axis.y(d.yValue) + ')';
+                })
+                .on('mousemove', function (d, i) {
                     var balloonContent = chart.getXYFormat(d, chart.series[d.index]);
-
+                    
                     //show balloon
                     chart.showBalloon(balloonContent);
 
