@@ -543,12 +543,12 @@
                 if (chart.xAxis.title !== '') {
                     //create base x axis title
                     chart.svg.append('g').append('text')
-                        .text(chart.yAxis.title)
-                        .style('fill', chart.yAxis.titleFontColor)
-                        .style('font-family', chart.yAxis.titleFontFamily)
-                        .style('font-size', chart.yAxis.titleFontSize + 'px')
-                        .style('font-style', chart.yAxis.titleFontStyle === 'bold' ? 'normal' : chart.yAxis.titleFontStyle)
-                        .style('font-weight', chart.yAxis.titleFontStyle === 'bold' ? 'bold' : 'normal')
+                        .text(chart.xAxis.title)
+                        .style('fill', chart.xAxis.titleFontColor)
+                        .style('font-family', chart.xAxis.titleFontFamily)
+                        .style('font-size', chart.xAxis.titleFontSize + 'px')
+                        .style('font-style', chart.xAxis.titleFontStyle === 'bold' ? 'normal' : chart.xAxis.titleFontStyle)
+                        .style('font-weight', chart.xAxis.titleFontStyle === 'bold' ? 'bold' : 'normal')
                         .style('text-anchor', 'middle')
                         .attr('x', function (d) {
                             //get bbox
@@ -573,12 +573,12 @@
                 if (chart.yAxis.title !== '') {
                     //create base y axis title
                     chart.svg.append('g').append('text')
-                        .text(chart.xAxis.title)
-                        .style('fill', chart.xAxis.titleFontColor)
-                        .style('font-family', chart.xAxis.titleFontFamily)
-                        .style('font-size', chart.xAxis.titleFontSize + 'px')
-                        .style('font-style', chart.xAxis.titleFontStyle === 'bold' ? 'normal' : chart.xAxis.titleFontStyle)
-                        .style('font-weight', chart.xAxis.titleFontStyle === 'bold' ? 'bold' : 'normal')
+                        .text(chart.yAxis.title)
+                        .style('fill', chart.yAxis.titleFontColor)
+                        .style('font-family', chart.yAxis.titleFontFamily)
+                        .style('font-size', chart.yAxis.titleFontSize + 'px')
+                        .style('font-style', chart.yAxis.titleFontStyle === 'bold' ? 'normal' : chart.yAxis.titleFontStyle)
+                        .style('font-weight', chart.yAxis.titleFontStyle === 'bold' ? 'bold' : 'normal')
                         .style('text-anchor', 'middle')
                         .attr('transform', function (d) {
                             //get bbox

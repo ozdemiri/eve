@@ -69,7 +69,7 @@
                     //calculate bullet size
                     var axisSerieRange = axisSerie.maxSize - axisSerie.minSize,
                         chartSerieRange = chartSerie.maxBulletSize - chartSerie.minBulletSize,
-                        bulletSize = d.sizeValue / axisSerieRange * chartSerieRange - (axisSerie.minSize / axisSerieRange * chartSerieRange) + chartSerie.minBulletSize;
+                        bulletSize = axisSerieRange === 0 ? chartSerie.maxBulletSize : (d.sizeValue / axisSerieRange * chartSerieRange - (axisSerie.minSize / axisSerieRange * chartSerieRange) + chartSerie.minBulletSize);
 
                     //return calculated bullet size
                     return Math.pow(bulletSize, 2);
@@ -141,7 +141,7 @@
                             chartSerieRange = chartSerie.maxBulletSize - chartSerie.minBulletSize;
                     
                         //set bullet size
-                        bulletSize = d.sizeValue / axisSerieRange * chartSerieRange - (axisSerie.minSize / axisSerieRange * chartSerieRange) + chartSerie.minBulletSize;
+                        bulletSize = axisSerieRange === 0 ? chartSerie.maxBulletSize : (d.sizeValue / axisSerieRange * chartSerieRange - (axisSerie.minSize / axisSerieRange * chartSerieRange) + chartSerie.minBulletSize);
 
                         //return calculated bullet size
                         labelHeightPos = bulletSize / 2;
@@ -199,7 +199,7 @@
                             chartSerieRange = chartSerie.maxBulletSize - chartSerie.minBulletSize;
                     
                         //set bullet size
-                        bulletSize = d.sizeValue / axisSerieRange * chartSerieRange - (axisSerie.minSize / axisSerieRange * chartSerieRange) + chartSerie.minBulletSize;
+                        bulletSize = axisSerieRange === 0 ? chartSerie.maxBulletSize : (d.sizeValue / axisSerieRange * chartSerieRange - (axisSerie.minSize / axisSerieRange * chartSerieRange) + chartSerie.minBulletSize);
                     }
                 
                     //check x axis data type
