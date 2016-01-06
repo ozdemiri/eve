@@ -46,8 +46,7 @@
             auto: true,
             sectionCount: 5,
             sections: [],
-            startColor: '',
-            endColor: ''
+			baseColor: e.colors[0]
         },
         series: [],
         title: {
@@ -137,7 +136,7 @@
 
         //clear element content
         element.innerHTML = '';
-        
+
         //get element parent node
         parent = element.parentNode;
         offset = e.offset(parent);
@@ -207,7 +206,7 @@
             if(x == null) x = parseInt(d3.event.pageX + 5);
             if(y == null) y = parseInt(d3.event.pageY + 5);
 
-            if(that.balloon.enabled && balloon != null) {
+            if(that.balloon.enabled && content !== '' && balloon != null) {
                 balloon.innerHTML = content;
                 balloon.style['left'] = x + 'px';
                 balloon.style['top'] = y + 'px';
@@ -261,6 +260,82 @@
             //replace title
             if(serie.titleField)
                 content = content.replaceAll('{title}', currentData[serie.titleField]);
+
+            //replace label
+            if(serie.labelField)
+                content = content.replaceAll('{label}', currentData[serie.labelField]);
+
+            //replace value
+            if(serie.valueField)
+                content = content.replaceAll('{value}', formatter(currentValue));
+
+            //replace alpha
+            if(serie.alphaField)
+                content = content.replaceAll('{alpha}', currentData[serie.alphaField]);
+
+            //replace color
+            if(serie.colorField)
+                content = content.replaceAll('{color}', currentData[serie.colorField]);
+
+            //replace total value
+            if(totalValue != null)
+                content = content.replaceAll('{total}', formatter(totalValue));
+
+            //replace percents
+            if(percentValue != null)
+                content = content.replaceAll('{percent}', percentValue + '%');
+
+            return content;
+        };
+
+        //gets formatted content for maps
+        that.getMapFormat = function(currentData, serie, section) {
+            //handle Error
+            if(currentData == null)
+                return '';
+
+            //declare variables
+            var content = '',
+                totalValue = d3.sum(that.data, function(d) { return d[serie.valueField]; }),
+                currentValue = currentData[serie.valueField] == null ? 0 : currentData[serie.valueField],
+                percentValue = (currentValue / totalValue * 100).toFixed(2),
+                formatter = d3.format();
+
+            //check section
+            if(section == null)
+                section = 'balloon';
+
+            //switch section
+            switch(section) {
+                case 'label':
+                    {
+                        //check serie number format
+                        if(serie.numberFormat !== '')
+                            formatter = d3.format(serie.numberFormat);
+
+                        //set content
+                        content = serie.labelFormat;
+                    }
+                    break;
+                case 'balloon':
+                    {
+                        //check serie number format
+                        if(that.balloon.numberFormat !== '')
+                            formatter = d3.format(that.balloon.numberFormat);
+
+                        //set content
+                        content = that.balloon.format;
+                    }
+                    break;
+            }
+
+            //replace title
+            if(serie.titleField)
+                content = content.replaceAll('{title}', currentData[serie.titleField]);
+
+            //replace label
+            if(serie.labelField)
+                content = content.replaceAll('{label}', currentData[serie.labelField]);
 
             //replace value
             if(serie.valueField)

@@ -98,11 +98,11 @@
         function init() {
             //create line function
             lineF = d3.svg.line()
-                .x(function(d) { 
+                .x(function(d) {
                     if(axis.xAxisDataType === 'string')
                         return axis.x(d.xValue) + axis.x.rangeBand() / 2;
                     else
-                        return axis.x(d.xValue); 
+                        return axis.x(d.xValue);
                 })
                 .y(function(d) { return axis.y(d.yValue); });
 
@@ -211,8 +211,9 @@
                         return 'translate(' + (axis.x(d.xValue) + axis.offset.left) + ',' + axis.y(d.yValue) + ')';
                 })
                 .on('mousemove', function (d, i) {
+                    //get balloon content
                     var balloonContent = chart.getXYFormat(d, chart.series[d.index]);
-                    
+
                     //show balloon
                     chart.showBalloon(balloonContent);
 

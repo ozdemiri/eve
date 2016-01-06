@@ -11,6 +11,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
     <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.19/topojson.min.js"></script>
+	<script src="http://cdn.leafletjs.com/leaflet-0.7/leaflet.js"></script>
+	<script src="http://localhost/jscolor.js"></script>
     <script src="src/eve.js"></script>
 	<script src="src/eve.charts.js"></script>
 	<script src="src/eve.axis.js"></script>
@@ -58,10 +60,31 @@
 
     <!-- main -->
     <div class="container-fluid eve-content">
-            <div class="col-md-6 chartArea">
-                <div id="divmap"></div>
+            <div class="col-md-6 chartArea" style="height:200px;width:200px">
+					<select id="mapname">
+						<option value="world">World</option>
+						<option value="worldwoantarctica">World wo Antarctica</option>
+						<option value="africa">Africa</option>
+						<option value="asia">Asia</option>
+						<option value="centralamerica">Central America</option>
+						<option value="europe">Europe</option>
+						<option value="northamerica">North America</option>
+						<option value="ocenia">Ocenia</option>
+						<option value="oceniawoantarctica">Ocenia wo Antarctica</option>
+						<option value="southamerica">South America</option>
+					</select> 
+					<br>
+					<input type="checkbox" checked=true id="balloon"> Baloons Enabled
+					<br>
+					<input type="checkbox" checked=true id="label"> Labels Enabled
+					<br>
+					<input class="jscolor" id="color" value="ab2567">
+				<button onclick="getMap()">Get Map</button>
             </div>
-		
+            <div class="col-md-6 chartArea" style="height:800px;width:1300px">
+                <div id="dvmap"></div>
+            </div>
+
         <div class="col-lg-12">
             <a name="start"></a>
             <h2>Getting Started</h2>

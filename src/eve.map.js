@@ -23,7 +23,7 @@
         labelFontFamily: 'Tahoma',
         labelFontSize: 10,
         labelFontStyle: 'normal',
-        labelFormat: '',
+        labelFormat: '{label}',
 		labelsEnabled: true,
         numberFormat: '',
         title: '',
@@ -52,104 +52,127 @@
             //set default balloon format
             if(chart.balloon.format === '')
                 chart.balloon.format = '{label}: {value}';
-
+            //set calculate parameter
+			var scaleParam = Math.min(chart.width, chart.height);
+			
+			//leaflet base map
+							
+			//create projection
+			var projection = d3.geo.equirectangular()
+				.scale((scaleParam / 640) * 100)
+				.translate([chart.width / 2, (chart.height / 2) + (chart.series[0].labelFontSize * 2)])
+				.precision(.1);
+				
+			// assign zoom settings
+			var labels = null;
+			var scale0 = (chart.width - 1) / 2 / Math.PI;
+			var zoom = d3.behavior.zoom()
+				.translate([chart.width / 2, chart.height / 2])
+				.scale(scale0)
+				.scaleExtent([scale0, 8 * scale0])
+				.on("zoom", zoomed);
+				
+            //create path
+			var path = d3.geo.path().projection(projection);
+			chart.svg
+				.call(zoom)
+				.call(zoom.event);
             //fill topology
             d3.json('src/maps/' + chart.series[0].map + '.json', function (error, data) {
-                //set topology
-                Topology = data;
-				
-				//set calculate parameter
-				var scaleParam = Math.min(chart.width, chart.height);
+                //create topology data
+                var topoData = topojson.feature(data, data.objects[chart.series[0].map + '.geo']).features;
 
-				//create projection
-				var projection = d3.geo.equirectangular()
-					.scale((scaleParam / 640) * 100)
-					.translate([chart.width / 2, (chart.height / 2) + (chart.labelFontSize * 2)])
-					.precision(.1);
-	
-				//create path
-				var path = d3.geo.path().projection(projection);
-				var topoData = topojson.feature(Topology, Topology.objects).features;
-			
-				//iterate all datas
-				chart.data.forEach(function (currentData, i) {
+                //build paths
+				var paths = chart.svg.append('g').selectAll('path')
+					.data(topoData)
+					.enter().append('path')
+					.attr('d', path)
+					.attr('stroke', '#ffffff')
+					.attr('stroke-width', .5)
+					.attr('fill-opacity', .9)
+					.attr('width', chart.width)
+					.attr('height', chart.width / 2)
+					.attr('fill-opacity', function (d) {
+						//get  data
+                        var sData = '';
+							minVal = d3.min(chart.data, function (a) { return a[chart.series[0].valueField]; }),
+							maxVal = d3.max(chart.data, function (a) { return a[chart.series[0].valueField];}),
+							fillColor = '#dddddd',
+                            currentDataName = e.filter(chart.data, chart.series[0].labelField, d.properties.name),
+                            currentDataCode = e.filter(chart.data, chart.series[0].labelField, d.properties.code),
+                            currentData = null,
+							fillOpacity = .9;
 
-					//check whether the labels are enabled
-					if (chart.series[0].labelsEnabled) {
-						//select all texts
-						var _label = chart.svg.append("text")
-							.datum(currentData)
-							.attr('dy', 0)
-							.attr('title', function (d, j) { return d[j].name; })
-							.style("text-anchor", "middle")
-							.style('fill', chart.series[0].labelFontColor)
-							.style('font-size', chart.series[0].labelFontSize + 'px')
-							.style('font-family', chart.series[0].labelFontFamily)
-							.style('font-style', chart.series[0].labelFontStyle === 'bold' ? 'normal' : chart.series[0].labelFontStyle)
-							.style('font-weight', chart.series[0].labelFontStyle === 'bold' ? 'bold' : 'normal')
-							.text(function (d, j) {
-								//get text
-								var labelText = d[j].name;
+                        //check data
+                        if(currentDataName.length > 0)
+                            currentData = currentDataName[0];
+                        else if(currentDataCode.length > 0)
+                            currentData = currentDataCode[0];
 
-								//format labels
-								var formatted = chart.series[0].labelFormat.replaceAll('{label}', labelText);
+						//check whether the state data is not null
+                        if (currentData != null) {
+							//get colors
+							var categoryColor = chart.legend.baseColor,
+								colorDepthPercent =  Math.abs(currentData[chart.series[0].valueField]) / (maxVal-minVal) * 100 - (minVal / (maxVal-minVal)  * 100);
 
-								//return formatted
-								return formatted;
-							})
-							.attr('x', chart.width / 2)
-							.attr("y", function (d) {
-								//get bbox
-								var yPos = this.getBBox().height / 2 + 2;
-
-								//return height
-								return yPos;
-							});
-					}
-
-					//build paths
-					var paths = chart.svg.append('g').selectAll('path')
-						.data(topoData)
-						.enter().append('path')
-						.attr('d', path)
-						.attr('stroke', '#ffffff')
-						.attr('stroke-width', .5)
-						.attr('fill-opacity', .9)
-						.attr('width', chart.width)
-						.attr('height', chart.width / 2)
-						.attr('fill-opacity', function (d) {
-							//get  data
-							var sData = d.name || d.code;
-								minVal = d3.min(chart.data, function (a) { return a[chart.series[0].valueField]; }),
-								maxVal = d3.max(chart.data, function (a) { return a[chart.series[0].valueField];}),
-								fillColor = '#dddddd',
-								fillOpacity = .9;
-
-							//check whether the state data is not null
-							if (sData != null) {
-								//get colors
-								var categoryColor = e.colors[0],
-									colorDepthPercent =  Math.abs(currentData[chart.series[0].valueField]) / (maxVal-minVal) * 100 - (minVal / (maxVal-minVal)  * 100);
-
-								//check whether the value is > 0
-								if (sData.value > 0) {
-									//set fill color & opacity
-									fillColor = categoryColor;
-									fillOpacity =  (Math.abs(colorDepthPercent) / 100 * .6) + .3;
-								}
+                            //check whether the value is > 0
+							if (currentData[chart.series[0].valueField] > 0) {
+								//set fill color & opacity
+								fillColor = categoryColor;
+								fillOpacity =  (Math.abs(colorDepthPercent) / 100 * .6) + .3;
 							}
+						}
 
-							//set fill color
-							d.fillColor = fillColor;
-							d.fillOpacity = fillOpacity;
+						//set fill color
+						d.fillColor = fillColor;
+						d.fillOpacity = fillOpacity;
+                        d.currentData = currentData;
 
-							//return fill opacity
-							return d.fillOpacity;
-						} )
-						.attr('fill', function (d) { return d.fillColor; });
+						//return fill opacity
+                        return d.fillOpacity;
+					})
+					.attr('fill', function (d) { return d.fillColor; })
+                    .on('mousemove', function(d, i) {
+                        //get balloon content
+                        var balloonContent = chart.getMapFormat(d.currentData, chart.series[0]);
 
-					});				
+                        //show balloon
+                        chart.showBalloon(balloonContent);
+                    })
+                    .on('mouseout', function(d, i) {
+                        //hide balloon
+                        chart.hideBalloon();
+                    });
+
+                //check if labels are enabled
+                if(chart.series[0].labelsEnabled && chart.series[0].labelFormat !== '') {
+                    //create labels
+                    labels = chart.svg.append('g').selectAll('text')
+                        .data(topoData)
+                        .enter().append('text')
+                        .style("text-anchor", "middle")
+						.style('fill', chart.series[0].labelFontColor)
+						.style('font-size', chart.series[0].labelFontSize + 'px')
+						.style('font-family', chart.series[0].labelFontFamily)
+						.style('font-style', chart.series[0].labelFontStyle === 'bold' ? 'normal' : chart.series[0].labelFontStyle)
+						.style('font-weight', chart.series[0].labelFontStyle === 'bold' ? 'bold' : 'normal')
+                        .text(function(d) { return d.id; })
+						.attr("transform", function(d) { return "translate(" + path.centroid(d) + ")"; })
+						.attr("dy", ".35em");
+                }
             });
+			
+			function zoomed() {
+				projection
+					.translate(zoom.translate())
+					.scale(zoom.scale());
+
+				chart.svg.select('g').selectAll('path').attr("d", path);
+				if(chart.series[0].labelsEnabled && chart.series[0].labelFormat !== '' && labels !== null) {
+                    //create labels
+						labels.attr("transform", function(d) { return "translate(" + path.centroid(d) + ")"; })
+                }
+			}
 
         }
 

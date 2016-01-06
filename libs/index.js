@@ -1,6 +1,29 @@
 //declare datas
 var dataXY = [],
     dataSliced = [];
+	
+//get Map
+function getMap(){
+	document.getElementById('dvmap').innerHTML = "";	
+		d3.csv('libs/countries.csv', function(err, data) {
+        data.forEach(function(d) {
+            d.Measure = parseFloat(d.Measure);
+        })
+
+		eve.map({
+			container: 'dvmap',
+			data: data,
+			legend: {baseColor: '#' + document.getElementById('color').value},
+			series: [{
+				map: document.getElementById('mapname').value,
+				labelField: 'Country',
+				valueField: 'Measure',
+				labelsEnabled: document.getElementById('label').checked
+			}],
+			balloon: {enabled: document.getElementById('balloon').checked, format: '{label}:{value}'}
+		})
+	});
+}
 
 //load test data
 $(document).ready(function() {
@@ -27,21 +50,10 @@ $(document).ready(function() {
             //draw area chart
             drawArea();
             drawBar();
-            drawLine();
+            //drawLine();
         });
-		
-	d3.csv('libs/countries.csv', function(err, data) {
-		eve.map({
-			container: 'divmap',
-			data: data,
-			series: [{
-				map: 'world',
-				labelField: 'Country',
-				valueField: 'Measure'
-			}]
-		})
-		
-	});
+
+
 });
 
 //draw charts

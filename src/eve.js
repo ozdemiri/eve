@@ -83,6 +83,13 @@
         return returnType;
     };
 
+    //filters array
+    eve.filter = function(arr, property, value) {
+        return arr.filter(function(a) {
+            return a[property] == value;
+        });
+    };
+
     //generates a random integer
     eve.randInt = function(min, max) {
         if(min == null) min = 0;
