@@ -54,7 +54,7 @@
                 chart.balloon.format = '{label}: {value}';
 
             //fill topology
-            d3.json('maps/' + chart.series[0].map + '.json', function (error, data) {
+            d3.json('src/maps/' + chart.series[0].map + '.json', function (error, data) {
                 //set topology
                 Topology = data;
 				
@@ -74,18 +74,10 @@
 				//iterate all datas
 				chart.data.forEach(function (currentData, i) {
 
-					//create svg
-					var svg = d3.select(_element).append("svg")
-						.attr('class', chart.container + '_svg')
-						.attr("width", chart.width)
-						.attr("height", chart.height)
-						.style('fill', '#ffffff')
-						.style('fill-opacity', 1);
-
 					//check whether the labels are enabled
 					if (chart.series[0].labelsEnabled) {
 						//select all texts
-						var _label = svg.append("text")
+						var _label = chart.svg.append("text")
 							.datum(currentData)
 							.attr('dy', 0)
 							.attr('title', function (d, j) { return d[j].name; })
@@ -116,7 +108,7 @@
 					}
 
 					//build paths
-					var paths = svg.append('g').selectAll('path')
+					var paths = chart.svg.append('g').selectAll('path')
 						.data(topoData)
 						.enter().append('path')
 						.attr('d', path)

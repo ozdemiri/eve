@@ -28,7 +28,20 @@ $(document).ready(function() {
             drawArea();
             drawBar();
             drawLine();
-        })
+        });
+		
+	d3.csv('libs/countries.csv', function(err, data) {
+		eve.map({
+			container: 'divmap',
+			data: data,
+			series: [{
+				map: 'world',
+				labelField: 'Country',
+				valueField: 'Measure'
+			}]
+		})
+		
+	});
 });
 
 //draw charts

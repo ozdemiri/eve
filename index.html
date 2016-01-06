@@ -10,7 +10,18 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
     <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
-    <script src="eve-min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.19/topojson.min.js"></script>
+    <script src="src/eve.js"></script>
+	<script src="src/eve.charts.js"></script>
+	<script src="src/eve.axis.js"></script>
+	<script src="src/eve.area.js"></script>
+	<script src="src/eve.bar.js"></script>
+	<script src="src/eve.bubble.js"></script>
+	<script src="src/eve.funnel.js"></script>
+	<script src="src/eve.line.js"></script>
+	<script src="src/eve.map.js"></script>
+	<script src="src/eve.pie.js"></script>
+	<script src="src/eve.scatter.js"></script>
     <script src="libs/index.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" />
     <link rel="stylesheet" href="libs/font-awesome/css/font-awesome.min.css" />
@@ -47,6 +58,10 @@
 
     <!-- main -->
     <div class="container-fluid eve-content">
+            <div class="col-md-6 chartArea">
+                <div id="divmap"></div>
+            </div>
+		
         <div class="col-lg-12">
             <a name="start"></a>
             <h2>Getting Started</h2>
