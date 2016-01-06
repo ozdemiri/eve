@@ -42,7 +42,12 @@
             fontSize: 12,
             fontStyle: 'normal',
             icon: 'square',
-            position: 'right'
+            position: 'right',
+            auto: true,
+            sectionCount: 5,
+            sections: [],
+            startColor: '',
+            endColor: ''
         },
         series: [],
         title: {
