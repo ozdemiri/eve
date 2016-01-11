@@ -46,7 +46,7 @@
         //set x Data Type as string if chart type is bar or column
         if(chart.type === 'bar' || chart.type === 'column')
             xDataType = 'string';
-        
+
         //set x data type
         this.xAxisDataType = xDataType;
 
@@ -112,7 +112,7 @@
                 return parseFloat(v.yValue);
             });
         });
-        
+
         //check chart type to set serie max
         if (chart.type === 'area') {
             //set max serie value
@@ -132,9 +132,10 @@
                 });
             }
         }
-        
+
         //increase serie max by 10 percent
-        serieMax *= 1.25;
+        if (chart.type !== 'bar' && chart.type !== 'column')
+            serieMax *= 1.25;
 
         //set serie min
         serieMin = chart.yAxis.startsFromZero ? 0 : serieMin;
@@ -171,7 +172,7 @@
         var maxValue = d3.max(maxValues),
             minValue = minValues.min(),
             symbolSize = Math.pow(chart.legend.fontSize, 2);
-        
+
         //check chart type to set serie max
         if (chart.type === 'area') {
             //set max value
@@ -536,6 +537,10 @@
             }
         }
 
+        //check whether the legend is not enabled
+        if (!chart.legend.enabled)
+            axisWidth -= chart.legend.fontSize * 2;
+
         //draws axis titles
         function drawTitles() {
             if(isReversed) {
@@ -707,7 +712,7 @@
                         var domainArray = chart.data.map(function (d) {
                             return d[chart.xField].toString();
                         });
-                        
+
                         //sort domain array
                         domainArray.sort();
 
@@ -744,19 +749,19 @@
                 .attr('class', 'eve-x-grid')
                 .attr('transform', function () { return 'translate(' + axisLeft + ', ' + axisHeight + ')'; })
                 .call(createXAxis().tickSize(-axisHeight, 0, 0).tickFormat(''));
-            
+
             //set x axis grid line style
             xAxisGrid.selectAll('line')
                 .style('stroke-opacity', chart.xAxis.gridLineAlpha)
                 .style('stroke-width', chart.xAxis.gridLineThickness + 'px')
                 .style('stroke', chart.xAxis.gridLineColor);
-            
+
             //create y axis grid lines
             yAxisGrid = chart.svg.append('g')
                 .attr('class', 'eve-y-grid')
                 .attr('transform', function () { return 'translate(' + axisLeft + ')'; })
                 .call(createYAxis().tickSize(-axisWidth, 0, 0).tickFormat(''));
-            
+
             //set y axis grid line style
             yAxisGrid.selectAll('line')
                 .style('stroke-opacity', chart.yAxis.gridLineAlpha)
@@ -786,8 +791,8 @@
                 .style('fill', chart.yAxis.labelFontColor)
                 .style('font-size', chart.yAxis.labelFontSize + 'px')
                 .style('font-family', chart.yAxis.labelFontFamily)
-                .style('font-style', chart.yAxis.labelFontStlye === 'bold' ? 'normal' : chart.yAxis.labelFontStlye)
-                .style('font-weight', chart.yAxis.labelFontStlye === 'bold' ? 'bold' : 'normal')
+                .style('font-style', chart.yAxis.labelFontStyle === 'bold' ? 'normal' : chart.yAxis.labelFontStyle)
+                .style('font-weight', chart.yAxis.labelFontStyle === 'bold' ? 'bold' : 'normal')
                 .text(function(d) {
                     if(isReversed) {
                         if(xDataType === 'number')
@@ -843,8 +848,8 @@
                 .style('fill', chart.xAxis.labelFontColor)
                 .style('font-size', chart.xAxis.labelFontSize + 'px')
                 .style('font-family', chart.xAxis.labelFontFamily)
-                .style('font-style', chart.xAxis.labelFontStlye === 'bold' ? 'normal' : chart.xAxis.labelFontStlye)
-                .style('font-weight', chart.xAxis.labelFontStlye === 'bold' ? 'bold' : 'normal')
+                .style('font-style', chart.xAxis.labelFontStyle === 'bold' ? 'normal' : chart.xAxis.labelFontStyle)
+                .style('font-weight', chart.xAxis.labelFontStyle === 'bold' ? 'bold' : 'normal')
                 .text(function(d) {
                     if(isReversed) {
                         return d3.format(chart.yAxis.labelFormat)(d);
@@ -1069,8 +1074,8 @@
                 .style('fill', chart.xAxis.labelFontColor)
                 .style('font-size', chart.xAxis.labelFontSize + 'px')
                 .style('font-family', chart.xAxis.labelFontFamily)
-                .style('font-style', chart.xAxis.labelFontStlye === 'bold' ? 'normal' : chart.xAxis.labelFontStlye)
-                .style('font-weight', chart.xAxis.labelFontStlye === 'bold' ? 'bold' : 'normal')
+                .style('font-style', chart.xAxis.labelFontStyle === 'bold' ? 'normal' : chart.xAxis.labelFontStyle)
+                .style('font-weight', chart.xAxis.labelFontStyle === 'bold' ? 'bold' : 'normal')
                 .text(function(d) {
                     if(xDataType === 'number')
                         return d3.format(chart.xAxis.labelFormat)(d);
@@ -1103,8 +1108,8 @@
                 .style('fill', chart.yAxis.labelFontColor)
                 .style('font-size', chart.yAxis.labelFontSize + 'px')
                 .style('font-family', chart.yAxis.labelFontFamily)
-                .style('font-style', chart.yAxis.labelFontStlye === 'bold' ? 'normal' : chart.yAxis.labelFontStlye)
-                .style('font-weight', chart.yAxis.labelFontStlye === 'bold' ? 'bold' : 'normal')
+                .style('font-style', chart.yAxis.labelFontStyle === 'bold' ? 'normal' : chart.yAxis.labelFontStyle)
+                .style('font-weight', chart.yAxis.labelFontStyle === 'bold' ? 'bold' : 'normal')
                 .text(function(d) { return d3.format(chart.yAxis.labelFormat)(d); })
                 .attr('transform', function() {
                     //calculate single axis value area

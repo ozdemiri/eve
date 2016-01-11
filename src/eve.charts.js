@@ -171,10 +171,15 @@
             balloon.style['paddingTop'] = that.balloon.padding + 'px';
             balloon.style['paddingRight'] = that.balloon.padding + 'px';
             balloon.style['paddingBottom'] = that.balloon.padding + 'px';
-            if (that.balloon.fontStyle == 'bold')
+            if (that.balloon.fontStyle == 'bold') {
+                //update font weight
                 balloon.style['fontWeight'] = 'bold';
-            else
+                balloon.style['fontStyle'] = 'normal';
+            } else {
+                //update font weight
+                balloon.style['fontWeight'] = 'normal';
                 balloon.style['fontStyle'] = that.balloon.fontStyle;
+            }
         }
 
         //create canvas

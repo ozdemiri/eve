@@ -101,6 +101,7 @@
                             currentDataName = e.filter(chart.data, chart.series[0].labelField, d.properties.name),
                             currentDataCode2 = e.filter(chart.data, chart.series[0].labelField, d.properties.iso_a2),
                             currentDataCode3 = e.filter(chart.data, chart.series[0].labelField, d.properties.iso_a3),
+                            currentPostal = e.filter(chart.data, chart.series[0].labelField, d.properties.postal),
                             currentData = null,
 							fillOpacity = .9;
 
@@ -111,6 +112,8 @@
                             currentData = currentDataCode2[0];
                         else if(currentDataCode3.length > 0)
                             currentData = currentDataCode3[0];
+                        else if (currentPostal.length > 0)
+                            currentData = currentPostal[0];
 
 						//check whether the state data is not null
                         if (currentData != null) {
