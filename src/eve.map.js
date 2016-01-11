@@ -99,8 +99,8 @@
 							maxVal = d3.max(chart.data, function (a) { return a[chart.series[0].valueField];}),
 							fillColor = '#dddddd',
                             currentDataName = e.filter(chart.data, chart.series[0].labelField, d.properties.name),
-                            currentDataCode2 = e.filter(chart.data, chart.series[0].labelField, d.properties.code2),
-                            currentDataCode3 = e.filter(chart.data, chart.series[0].labelField, d.properties.code3),
+                            currentDataCode2 = e.filter(chart.data, chart.series[0].labelField, d.properties.iso_a2),
+                            currentDataCode3 = e.filter(chart.data, chart.series[0].labelField, d.properties.iso_a3),
                             currentData = null,
 							fillOpacity = .9;
 
