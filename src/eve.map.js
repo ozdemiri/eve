@@ -54,15 +54,15 @@
                 chart.balloon.format = '{label}: {value}';
             //set calculate parameter
 			var scaleParam = Math.min(chart.width, chart.height);
-			
+
 			//leaflet base map
-							
+
 			//create projection
 			var projection = d3.geo.equirectangular()
 				.scale((scaleParam / 640) * 100)
 				.translate([chart.width / 2, (chart.height / 2) + (chart.series[0].labelFontSize * 2)])
 				.precision(.1);
-				
+
 			// assign zoom settings
 			var labels = null;
 			var scale0 = (chart.width - 1) / 2 / Math.PI;
@@ -71,7 +71,7 @@
 				.scale(scale0)
 				.scaleExtent([scale0, 8 * scale0])
 				.on("zoom", zoomed);
-				
+
             //create path
 			var path = d3.geo.path().projection(projection);
 			chart.svg
@@ -99,15 +99,18 @@
 							maxVal = d3.max(chart.data, function (a) { return a[chart.series[0].valueField];}),
 							fillColor = '#dddddd',
                             currentDataName = e.filter(chart.data, chart.series[0].labelField, d.properties.name),
-                            currentDataCode = e.filter(chart.data, chart.series[0].labelField, d.properties.code),
+                            currentDataCode2 = e.filter(chart.data, chart.series[0].labelField, d.properties.code2),
+                            currentDataCode3 = e.filter(chart.data, chart.series[0].labelField, d.properties.code3),
                             currentData = null,
 							fillOpacity = .9;
 
                         //check data
                         if(currentDataName.length > 0)
                             currentData = currentDataName[0];
-                        else if(currentDataCode.length > 0)
-                            currentData = currentDataCode[0];
+                        else if(currentDataCode2.length > 0)
+                            currentData = currentDataCode2[0];
+                        else if(currentDataCode3.length > 0)
+                            currentData = currentDataCode3[0];
 
 						//check whether the state data is not null
                         if (currentData != null) {
@@ -161,7 +164,7 @@
 						.attr("dy", ".35em");
                 }
             });
-			
+
 			function zoomed() {
 				projection
 					.translate(zoom.translate())
