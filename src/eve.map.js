@@ -10,7 +10,7 @@
  *
  * DEFINITION
  * Map class.
- */
+ */ 
 (function(e) {
     //define default options
     var defaults = {
@@ -73,12 +73,23 @@
 				.on("zoom", zoomed);
 
             //create path
-			var path = d3.geo.path().projection(projection);
-			chart.svg
+            var path = d3.geo.path().projection(projection),
+                folderPath = 'src/maps/';
+            
+            //append zoom
+            chart.svg
 				.call(zoom)
 				.call(zoom.event);
+
             //fill topology
-            d3.json('src/maps/' + chart.series[0].map + '.json', function (error, data) {
+            chart.series[0].map = chart.series[0].map.replace('%20', '').trim();
+            
+            //check map name
+            if (chart.series[0].map.length === 3)
+                folderPath = 'src/maps/countries/';
+                
+            //fill topology
+            d3.json(folderPath + chart.series[0].map + '.json', function (error, data) {
                 //create topology data
                 var topoData = topojson.feature(data, data.objects[chart.series[0].map + '.geo']).features;
 
@@ -106,11 +117,11 @@
 							fillOpacity = .9;
 
                         //check data
-                        if(currentDataName.length > 0)
+                        if (currentDataName.length > 0)
                             currentData = currentDataName[0];
-                        else if(currentDataCode2.length > 0)
+                        else if (currentDataCode2.length > 0)
                             currentData = currentDataCode2[0];
-                        else if(currentDataCode3.length > 0)
+                        else if (currentDataCode3.length > 0)
                             currentData = currentDataCode3[0];
                         else if (currentPostal.length > 0)
                             currentData = currentPostal[0];
@@ -162,7 +173,12 @@
 						.style('font-family', chart.series[0].labelFontFamily)
 						.style('font-style', chart.series[0].labelFontStyle === 'bold' ? 'normal' : chart.series[0].labelFontStyle)
 						.style('font-weight', chart.series[0].labelFontStyle === 'bold' ? 'bold' : 'normal')
-                        .text(function(d) { return d.id; })
+                        .text(function(d) {
+							if (chart.series[0].map.length === 3)
+								return d.properties.postal;
+							else
+								return d.properties.iso_a2;
+							})
 						.attr("transform", function(d) { return "translate(" + path.centroid(d) + ")"; })
 						.attr("dy", ".35em");
                 }
