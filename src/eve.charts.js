@@ -232,6 +232,8 @@
                 totalValue = d3.sum(that.data, function(d) { return d[serie.valueField]; }),
                 currentValue = currentData[serie.valueField] == null ? 0 : currentData[serie.valueField],
                 percentValue = (currentValue / totalValue * 100).toFixed(2),
+                numberFormat = '',
+                numberFormatPrefix = '',
                 formatter = d3.format();
 
             //check section
@@ -242,9 +244,22 @@
             switch(section) {
                 case 'label':
                     {
+                        //split serie number format
+                        var splitted = serie.numberFormat.split('|');
+
+                        //check if number format contains prefix
+                        if (splitted.length === 2) {
+                            //set number format and its prefix
+                            numberFormat = splitted[1];
+                            numberFormatPrefix = splitted[0];
+                        } else {
+                            //set number format
+                            numberFormat = serie.numberFormat;
+                        }
+
                         //check serie number format
                         if(serie.numberFormat !== '')
-                            formatter = d3.format(serie.numberFormat);
+                            formatter = d3.format(numberFormat);
 
                         //set content
                         content = serie.labelFormat;
@@ -252,9 +267,22 @@
                     break;
                 case 'balloon':
                     {
+                        //split serie number format
+                        var splitted = that.balloon.numberFormat.split('|');
+
+                        //check if number format contains prefix
+                        if (splitted.length === 2) {
+                            //set number format and its prefix
+                            numberFormat = splitted[1];
+                            numberFormatPrefix = splitted[0];
+                        } else {
+                            //set number format
+                            numberFormat = that.balloon.numberFormat;
+                        }
+
                         //check serie number format
                         if(that.balloon.numberFormat !== '')
-                            formatter = d3.format(that.balloon.numberFormat);
+                            formatter = d3.format(numberFormat);
 
                         //set content
                         content = that.balloon.format;
@@ -272,7 +300,7 @@
 
             //replace value
             if(serie.valueField)
-                content = content.replaceAll('{value}', formatter(currentValue));
+                content = content.replaceAll('{value}', numberFormatPrefix + formatter(currentValue));
 
             //replace alpha
             if(serie.alphaField)
@@ -284,7 +312,7 @@
 
             //replace total value
             if(totalValue != null)
-                content = content.replaceAll('{total}', formatter(totalValue));
+                content = content.replaceAll('{total}', numberFormatPrefix + formatter(totalValue));
 
             //replace percents
             if(percentValue != null)
@@ -304,6 +332,8 @@
                 totalValue = d3.sum(that.data, function(d) { return d[serie.valueField]; }),
                 currentValue = currentData[serie.valueField] == null ? 0 : currentData[serie.valueField],
                 percentValue = (currentValue / totalValue * 100).toFixed(2),
+                numberFormat = '',
+                numberFormatPrefix = '',
                 formatter = d3.format();
 
             //check section
@@ -314,9 +344,22 @@
             switch(section) {
                 case 'label':
                     {
+                        //split serie number format
+                        var splitted = serie.numberFormat.split('|');
+
+                        //check if number format contains prefix
+                        if (splitted.length === 2) {
+                            //set number format and its prefix
+                            numberFormat = splitted[1];
+                            numberFormatPrefix = splitted[0];
+                        } else {
+                            //set number format
+                            numberFormat = serie.numberFormat;
+                        }
+
                         //check serie number format
-                        if(serie.numberFormat !== '')
-                            formatter = d3.format(serie.numberFormat);
+                        if (serie.numberFormat !== '')
+                            formatter = d3.format(numberFormat);
 
                         //set content
                         content = serie.labelFormat;
@@ -324,8 +367,21 @@
                     break;
                 case 'balloon':
                     {
+                        //split serie number format
+                        var splitted = that.balloon.numberFormat.split('|');
+
+                        //check if number format contains prefix
+                        if (splitted.length === 2) {
+                            //set number format and its prefix
+                            numberFormat = splitted[1];
+                            numberFormatPrefix = splitted[0];
+                        } else {
+                            //set number format
+                            numberFormat = that.balloon.numberFormat;
+                        }
+
                         //check serie number format
-                        if(that.balloon.numberFormat !== '')
+                        if (that.balloon.numberFormat !== '')
                             formatter = d3.format(that.balloon.numberFormat);
 
                         //set content
@@ -344,7 +400,7 @@
 
             //replace value
             if(serie.valueField)
-                content = content.replaceAll('{value}', formatter(currentValue));
+                content = content.replaceAll('{value}', numberFormatPrefix + formatter(currentValue));
 
             //replace alpha
             if(serie.alphaField)
@@ -356,7 +412,7 @@
 
             //replace total value
             if(totalValue != null)
-                content = content.replaceAll('{total}', formatter(totalValue));
+                content = content.replaceAll('{total}', numberFormatPrefix +formatter(totalValue));
 
             //replace percents
             if(percentValue != null)
@@ -372,6 +428,8 @@
                 dateFormatter = d3.time.format('%m/%d/%Y'),
                 xValue = data.xValue,
                 yValue = data.yValue,
+                numberFormat = '',
+                numberFormatPrefix = '',
                 sizeValue = data.sizeValue;
 
             //check section
@@ -382,9 +440,22 @@
             switch(section) {
                 case 'label':
                     {
+                        //split serie number format
+                        var splitted = serie.numberFormat.split('|');
+
+                        //check if number format contains prefix
+                        if (splitted.length === 2) {
+                            //set number format and its prefix
+                            numberFormat = splitted[1];
+                            numberFormatPrefix = splitted[0];
+                        } else {
+                            //set number format
+                            numberFormat = serie.numberFormat;
+                        }
+
                         //check serie number format
-                        if(serie.numberFormat !== '')
-                            formatter = d3.format(serie.numberFormat);
+                        if (serie.numberFormat !== '')
+                            formatter = d3.format(numberFormat);
 
                         //check serie date format
                         if(serie.dateFormat !== '')
@@ -396,9 +467,22 @@
                     break;
                 case 'balloon':
                     {
+                        //split serie number format
+                        var splitted = that.balloon.numberFormat.split('|');
+
+                        //check if number format contains prefix
+                        if (splitted.length === 2) {
+                            //set number format and its prefix
+                            numberFormat = splitted[1];
+                            numberFormatPrefix = splitted[0];
+                        } else {
+                            //set number format
+                            numberFormat = that.balloon.numberFormat;
+                        }
+
                         //check serie number format
-                        if(that.balloon.numberFormat !== '')
-                            formatter = d3.format(that.balloon.numberFormat);
+                        if (that.balloon.numberFormat !== '')
+                            formatter = d3.format(numberFormat);
 
                         //check serie date format
                         if(that.balloon.dateFormat !== '')
@@ -416,8 +500,8 @@
                     content = content.replaceAll('{x}', dateFormatter(xValue));
                     content = content.replaceAll('{title}', dateFormatter(xValue));
                 } else if(e.getType(xValue) === 'number') {
-                    content = content.replaceAll('{x}', formatter(xValue));
-                    content = content.replaceAll('{title}', formatter(xValue));
+                    content = content.replaceAll('{x}', xValue);//numberFormatPrefix + formatter(xValue));
+                    content = content.replaceAll('{title}', xValue);//numberFormatPrefix + formatter(xValue));
                 } else {
                     content = content.replaceAll('{x}', xValue);
                     content = content.replaceAll('{title}', xValue);
@@ -426,17 +510,21 @@
 
             //replace y value
             if (!isNaN(parseFloat(yValue))) {
-                content = content.replaceAll('{y}', formatter(yValue));
-                content = content.replaceAll('{value}', formatter(yValue));
+                content = content.replaceAll('{y}', numberFormatPrefix + formatter(yValue));
+                content = content.replaceAll('{value}', numberFormatPrefix + formatter(yValue));
             }
 
             //replace size value
             if (!isNaN(parseFloat(sizeValue)))
-                content = content.replaceAll('{size}', formatter(sizeValue));
+                content = content.replaceAll('{size}', numberFormatPrefix + formatter(sizeValue));
 
             //replace serie
             if(data.name)
                 content = content.replaceAll('{serie}', data.name);
+
+            //replace serie group
+            content = content.replaceAll('{group}', serie.yField);
+            content = content.replaceAll('{serie}', serie.yField);
 
             return content;
         };

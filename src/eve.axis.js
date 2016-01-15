@@ -819,7 +819,7 @@
                     if(chart.yAxis.labelAngle < 0)
                         return 'translate(-' + xMid + ', -' + yMid + ')rotate(' + chart.yAxis.labelAngle + ')';
                     else if(chart.yAxis.labelAngle > 0)
-                        return 'translate(-' + xMid + ', ' + yMid + ')rotate(' + chart.yAxis.labelAngle + ')';
+                        return 'translate(-' + xMid + ', ' + (bbox.height * 2) + ')rotate(' + chart.yAxis.labelAngle + ')';
                     else
                         return 'rotate(' + chart.yAxis.labelAngle + ')';
                 })
