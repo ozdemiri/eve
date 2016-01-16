@@ -56,7 +56,7 @@
             //set default balloon format
             if(chart.balloon.format === '')
                 chart.balloon.format = '{x}: {y}';
-
+            
             //initialize bar chart via stack state
             if(chart.yAxis.stacked) {
                 //create stacked bar chart
@@ -101,7 +101,7 @@
 
             //sort chart data
             chart.data.sort(function (a, b) { return b.total - a.total; });
-
+            
             //check whether the axis is reversed
             /*if (isReversed)
                 axis.x.domain([0, d3.max(chart.data, function (d) { return d.total; })]);

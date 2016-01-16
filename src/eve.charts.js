@@ -148,6 +148,10 @@
         //set height
         if(that.height === 'auto')
             that.height = offset.height;
+        
+        //set chart container location
+        that.left = offset.left;
+        that.top = offset.top;
 
         //set aspect ratio
         that.aspectRatio = that.width / that.height;
@@ -246,7 +250,7 @@
                     {
                         //split serie number format
                         var splitted = serie.numberFormat.split('|');
-
+                        
                         //check if number format contains prefix
                         if (splitted.length === 2) {
                             //set number format and its prefix
@@ -269,7 +273,7 @@
                     {
                         //split serie number format
                         var splitted = that.balloon.numberFormat.split('|');
-
+                        
                         //check if number format contains prefix
                         if (splitted.length === 2) {
                             //set number format and its prefix
@@ -346,7 +350,7 @@
                     {
                         //split serie number format
                         var splitted = serie.numberFormat.split('|');
-
+                        
                         //check if number format contains prefix
                         if (splitted.length === 2) {
                             //set number format and its prefix
@@ -356,7 +360,7 @@
                             //set number format
                             numberFormat = serie.numberFormat;
                         }
-
+                        
                         //check serie number format
                         if (serie.numberFormat !== '')
                             formatter = d3.format(numberFormat);
@@ -369,7 +373,7 @@
                     {
                         //split serie number format
                         var splitted = that.balloon.numberFormat.split('|');
-
+                        
                         //check if number format contains prefix
                         if (splitted.length === 2) {
                             //set number format and its prefix
@@ -379,7 +383,7 @@
                             //set number format
                             numberFormat = that.balloon.numberFormat;
                         }
-
+                        
                         //check serie number format
                         if (that.balloon.numberFormat !== '')
                             formatter = d3.format(that.balloon.numberFormat);
@@ -442,7 +446,7 @@
                     {
                         //split serie number format
                         var splitted = serie.numberFormat.split('|');
-
+                        
                         //check if number format contains prefix
                         if (splitted.length === 2) {
                             //set number format and its prefix
@@ -452,7 +456,7 @@
                             //set number format
                             numberFormat = serie.numberFormat;
                         }
-
+                        
                         //check serie number format
                         if (serie.numberFormat !== '')
                             formatter = d3.format(numberFormat);
@@ -469,7 +473,7 @@
                     {
                         //split serie number format
                         var splitted = that.balloon.numberFormat.split('|');
-
+                        
                         //check if number format contains prefix
                         if (splitted.length === 2) {
                             //set number format and its prefix
@@ -479,7 +483,7 @@
                             //set number format
                             numberFormat = that.balloon.numberFormat;
                         }
-
+                        
                         //check serie number format
                         if (that.balloon.numberFormat !== '')
                             formatter = d3.format(numberFormat);
@@ -521,7 +525,7 @@
             //replace serie
             if(data.name)
                 content = content.replaceAll('{serie}', data.name);
-
+            
             //replace serie group
             content = content.replaceAll('{group}', serie.yField);
             content = content.replaceAll('{serie}', serie.yField);

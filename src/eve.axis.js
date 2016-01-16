@@ -46,7 +46,7 @@
         //set x Data Type as string if chart type is bar or column
         if(chart.type === 'bar' || chart.type === 'column')
             xDataType = 'string';
-
+        
         //set x data type
         this.xAxisDataType = xDataType;
 
@@ -112,7 +112,7 @@
                 return parseFloat(v.yValue);
             });
         });
-
+        
         //check chart type to set serie max
         if (chart.type === 'area') {
             //set max serie value
@@ -132,7 +132,7 @@
                 });
             }
         }
-
+        
         //increase serie max by 10 percent
         if (chart.type !== 'bar' && chart.type !== 'column')
             serieMax *= 1.25;
@@ -172,7 +172,7 @@
         var maxValue = d3.max(maxValues),
             minValue = minValues.min(),
             symbolSize = Math.pow(chart.legend.fontSize, 2);
-
+        
         //check chart type to set serie max
         if (chart.type === 'area') {
             //set max value
@@ -536,7 +536,7 @@
                 axisWidth -= legendWidth + chart.legend.fontSize;
             }
         }
-
+        
         //check whether the legend is not enabled
         if (!chart.legend.enabled)
             axisWidth -= chart.legend.fontSize * 2;
@@ -712,7 +712,7 @@
                         var domainArray = chart.data.map(function (d) {
                             return d[chart.xField].toString();
                         });
-
+                        
                         //sort domain array
                         domainArray.sort();
 
@@ -749,19 +749,19 @@
                 .attr('class', 'eve-x-grid')
                 .attr('transform', function () { return 'translate(' + axisLeft + ', ' + axisHeight + ')'; })
                 .call(createXAxis().tickSize(-axisHeight, 0, 0).tickFormat(''));
-
+            
             //set x axis grid line style
             xAxisGrid.selectAll('line')
                 .style('stroke-opacity', chart.xAxis.gridLineAlpha)
                 .style('stroke-width', chart.xAxis.gridLineThickness + 'px')
                 .style('stroke', chart.xAxis.gridLineColor);
-
+            
             //create y axis grid lines
             yAxisGrid = chart.svg.append('g')
                 .attr('class', 'eve-y-grid')
                 .attr('transform', function () { return 'translate(' + axisLeft + ')'; })
                 .call(createYAxis().tickSize(-axisWidth, 0, 0).tickFormat(''));
-
+            
             //set y axis grid line style
             yAxisGrid.selectAll('line')
                 .style('stroke-opacity', chart.yAxis.gridLineAlpha)
