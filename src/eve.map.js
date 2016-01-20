@@ -58,10 +58,18 @@
             
             // assign zoom settings
             var labels = null;
-            var scale = Math.min(chart.width, chart.height) / 2;
+			var scale = 0;
+			if (chart.series[0].map === "USA")
+                scale = 1;
+			else
+				scale = Math.min(chart.width, chart.height) / 2;
             
+			var projection = null;
             //create projection
-            var projection = d3.geo.equirectangular();
+			if (chart.series[0].map === "USA")
+                projection = d3.geo.albersUsa().scale(scale);
+			else
+				projection = d3.geo.equirectangular();
             
             //create path
             var path = d3.geo.path().projection(projection),
@@ -215,8 +223,13 @@
                 //get bbox from the g
                 var actualBox = chart.svg.select('g')[0][0].getBBox();
                 
-                //set g dimension and re-calculate scale
-                scale = chart.width / actualBox.width  * 150 < chart.height / actualBox.height * 150 ? chart.width / actualBox.width * 150 : chart.height / actualBox.height * 150;
+				//set g dimension and re-calculate scale
+				if (chart.series[0].map === "USA"){
+					scale = 1 + (chart.width - actualBox.width) * 1.25 < 1 + (chart.height - actualBox.height) * 2 ? 1 + (chart.width - actualBox.width) * 1.25 : 1 + (chart.height - actualBox.height) * 2;
+				} else {
+					scale = chart.width / actualBox.width  * 150 < chart.height / actualBox.height * 150 ? chart.width / actualBox.width * 150 : chart.height / actualBox.height * 150;
+					scale = scale-25;
+				}
                 
                 //calculate center of x
                 if (minx > 0 && maxx > 0 || minx < 0 && maxx < 0)
@@ -230,14 +243,24 @@
                 else
                     ycen = (maxy - (Math.abs(miny) + Math.abs(maxy)) / 2);
                 
-                //apply zoom amk
-                zoom = d3.behavior.zoom()
+				
+				//apply zoom
+				if (chart.series[0].map === "USA"){
+					zoom = d3.behavior.zoom()
+                    .scale(scale)
+                    .translate([chart.width/2, chart.height/2])
+                    .scaleExtent([scale, 8 * scale])
+				    .on("zoom", zoomed);
+				}
+				else{
+					zoom = d3.behavior.zoom()
                     .scale(scale)
                     .translate([chart.width/2, chart.height/2])
                     .center([xcen, ycen])
                     .scaleExtent([scale, 8 * scale])
 				    .on("zoom", zoomed);
-                
+				}
+
                 //append zoom
                 chart.svg.call(zoom).call(zoom.event);
             });
@@ -245,11 +268,18 @@
             //handles map zoom
             function zoomed() {
                 //update projection
-                projection
-					.translate(zoom.translate())
-                    .center(zoom.center())
-					.scale(zoom.scale());
-                
+				if (chart.series[0].map === "USA"){
+					projection
+						.translate(zoom.translate())
+						.scale(zoom.scale());
+				}
+				else{
+					projection
+						.translate(zoom.translate())
+						.center(zoom.center())
+						.scale(zoom.scale());
+				}
+
                 //update map paths
                 chart.svg.select('g').selectAll('path').attr("d", path);
                 
