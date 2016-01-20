@@ -216,7 +216,7 @@
                 var actualBox = chart.svg.select('g')[0][0].getBBox();
                 
                 //set g dimension and re-calculate scale
-                scale = chart.width / actualBox.width * 150;
+                scale = chart.width / actualBox.width  * 150 < chart.height / actualBox.height * 150 ? chart.width / actualBox.width * 150 : chart.height / actualBox.height * 150;
                 
                 //calculate center of x
                 if (minx > 0 && maxx > 0 || minx < 0 && maxx < 0)
