@@ -54,7 +54,7 @@
                 chart.balloon.format = '{label}: {value}';
             
             //set calculate parameter
-            var folderPath = 'src/maps/';
+            var folderPath = '/maps/';
             
             // assign zoom settings
             var labels = null;
@@ -80,7 +80,7 @@
             
             //check map name
             if (chart.series[0].map.length === 3)
-                folderPath = 'src/maps/countries/';
+                folderPath = '/maps/countries/';
             
             //fill topology
             d3.json(folderPath + chart.series[0].map + '.json', function (error, data) {
@@ -190,7 +190,7 @@
                         //hide balloon
                         chart.hideBalloon();
                     });
-                
+
                 //check if labels are enabled
                 if (chart.series[0].labelsEnabled && chart.series[0].labelFormat !== '') {
                     //create labels
@@ -218,17 +218,21 @@
                         })
 						.attr("transform", function (d) { return "translate(" + path.centroid(d) + ")"; })
 						.attr("dy", ".35em");
+					
                 }
-                
-                //get bbox from the g
-                var actualBox = chart.svg.select('g')[0][0].getBBox();
-                
+                var gHeight = 0,
+					gWidth = 0;
+				
+                //get max bbox height and width from the g's
+
+				gHeight = chart.svg.selectAll('g')[0][0].getBBox().height;
+				gWidth = chart.svg.selectAll('g')[0][0].getBBox().width;
 				//set g dimension and re-calculate scale
 				if (chart.series[0].map === "USA"){
-					scale = 1 + (chart.width - actualBox.width) * 1.25 < 1 + (chart.height - actualBox.height) * 2 ? 1 + (chart.width - actualBox.width) * 1.25 : 1 + (chart.height - actualBox.height) * 2;
+					scale = 1 + (chart.width - gWidth) * 1.25 < 1 + (chart.height - gHeight) * 2 ? 1 + (chart.width - gWidth) * 1.25 : 1 + (chart.height - gHeight) * 2;
 				} else {
-					scale = chart.width / actualBox.width  * 150 < chart.height / actualBox.height * 150 ? chart.width / actualBox.width * 150 : chart.height / actualBox.height * 150;
-					scale = scale-25;
+					scale = chart.width / gWidth  * 150 < chart.height / gHeight * 150 ? chart.width / gWidth * 150 : chart.height / gHeight * 150;
+					scale = scale * 0.8;
 				}
                 
                 //calculate center of x
