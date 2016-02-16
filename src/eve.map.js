@@ -230,8 +230,13 @@
                                 //get label format
                                 var format = chart.series[0].labelFormat,
                                     labelValue = d.properties.name,
+									measureValue = '',
                                     codeValue = chart.series[0].map.length === 3 ? d.properties.postal : d.properties.iso_a2;
-                        
+									
+								// check if data for the shape exists
+								if(d.currentData)
+									measureValue = d.currentData.Measure;
+								
                                 //check whether the current data has iso_a3
                                 if(d.properties.iso_a3 != null) {
                                     //check if iso_a3 = STP
@@ -244,10 +249,12 @@
                                     else if (d.properties.iso_a3 === 'CUW')
                                         labelValue = 'Curacao';
                                 }
-                        
-                                //check length of the map name
-                                format = format.replaceAll('{code}', codeValue).replaceAll('{label}', labelValue);
-                        
+                                //assign format
+								format = format.replaceAll('{code}', codeValue).replaceAll('{label}', labelValue).replaceAll('{measure}', measureValue);
+								console.log(measureValue);
+								if(measureValue === '')
+									format = format.replaceAll(':','');
+									
                                 //return format
                                 return format;
                             })

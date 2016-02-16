@@ -18,7 +18,8 @@ function getMap(){
 				map: document.getElementById('mapname').value,
 				labelField: 'Country',
 				valueField: 'Measure',
-				labelsEnabled: document.getElementById('label').checked
+				labelsEnabled: document.getElementById('label').checked,
+				labelFormat: '{label}:{measure}'
 			}],
 			balloon: {enabled: document.getElementById('balloon').checked, format: '{label}:{value}'}
 		})
