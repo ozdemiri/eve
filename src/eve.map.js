@@ -235,7 +235,7 @@
 									
 								// check if data for the shape exists
 								if(d.currentData)
-									measureValue = d.currentData.Measure;
+									measureValue = d.currentData[chart.series[0].valueField];
 								
                                 //check whether the current data has iso_a3
                                 if(d.properties.iso_a3 != null) {
