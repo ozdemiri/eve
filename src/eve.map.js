@@ -19,6 +19,7 @@
         labelField: '',
         valueField: '',
         colorField: '',
+        parentField: '',
         useLeaflet: false,
         labelFontColor: '#333333',
         labelFontFamily: 'Tahoma',
@@ -59,12 +60,15 @@
             
             //determine folder path based on map name
             var folderPath = 'src/maps/'
+
             if (chart.series[0].map.length === 3)
                 folderPath = 'src/maps/countries/';
-            
+            else if (chart.series[0].map.substring(0,3) === "SC_")
+                folderPath = 'src/maps/SubCountries/';
+
             var projection = null;
             //create projection
-            if (chart.series[0].map === "USA")
+            if (chart.series[0].map === "USA" || chart.series[0].map === "SC_USACounties")
                 projection = d3.geo.albersUsa();
             else
                 projection = d3.geo.equirectangular();
@@ -135,15 +139,14 @@
                     ycen = (maxy - (Math.abs(miny) + Math.abs(maxy)) / 2);
                 
                 //create and calculate scale
-                var scale = 0;
-				if (chart.series[0].map === "USA") {
+				var scale = 0;
+				if (chart.series[0].map === "USA" || chart.series[0].map === "SC_USACounties") {
 					scale = chart.width / (xlenght * 0.00225) < chart.height / (ylenght * 0.0087) ? chart.width / (xlenght * 0.00225) : chart.height / (ylenght * 0.0087);
-                }
-                else {
+				}
+				else {
 					scale = chart.width / (0.0177 * xlenght) < chart.height / (0.0177 * ylenght) ? chart.width / (0.0177 * xlenght) : chart.height / (0.0177 * ylenght);
 					scale = scale * 0.85;
-                }
-
+				}
                 projection.scale(scale);
                 //create path
                 path = d3.geo.path().projection(projection);
@@ -188,9 +191,19 @@
                         
                         //check whether the value is > 0
                         if (currentData[chart.series[0].valueField] > 0) {
-                            //set fill color & opacity
-                            fillColor = categoryColor;
-                            fillOpacity = (Math.abs(colorDepthPercent) / 100 * .6) + .3;
+                            //check whether map has parent value
+                            console.log(chart.series[0].parentField);
+                            if (chart.series[0].parentField !=='') {
+                                if (currentData[chart.series[0].parentField] === d.properties.parent && currentData[chart.series[0].labelField] === d.properties.name ) {
+                                    //set fill color & opacity
+                                    fillColor = categoryColor;
+                                    fillOpacity = (Math.abs(colorDepthPercent) / 100 * .6) + .3;
+                                }
+                            } else {
+                                //set fill color & opacity
+                                fillColor = categoryColor;
+                                fillOpacity = (Math.abs(colorDepthPercent) / 100 * .6) + .3;
+                            } 
                         }
                     }
                     
@@ -230,13 +243,8 @@
                                 //get label format
                                 var format = chart.series[0].labelFormat,
                                     labelValue = d.properties.name,
-									measureValue = '',
                                     codeValue = chart.series[0].map.length === 3 ? d.properties.postal : d.properties.iso_a2;
-									
-								// check if data for the shape exists
-								if(d.currentData)
-									measureValue = d.currentData[chart.series[0].valueField];
-								
+                        
                                 //check whether the current data has iso_a3
                                 if(d.properties.iso_a3 != null) {
                                     //check if iso_a3 = STP
@@ -249,12 +257,10 @@
                                     else if (d.properties.iso_a3 === 'CUW')
                                         labelValue = 'Curacao';
                                 }
-                                //assign format
-								format = format.replaceAll('{code}', codeValue).replaceAll('{label}', labelValue).replaceAll('{measure}', measureValue);
-								console.log(measureValue);
-								if(measureValue === '')
-									format = format.replaceAll(':','');
-									
+                        
+                                //check length of the map name
+                                format = format.replaceAll('{code}', codeValue).replaceAll('{label}', labelValue);
+                        
                                 //return format
                                 return format;
                             })
@@ -263,7 +269,7 @@
 						
                 }
                 //apply zoom
-                if (chart.series[0].map === "USA") {
+                if (chart.series[0].map === "USA" || chart.series[0].map === "SC_USACounties") {
                     zoom = d3.behavior.zoom()
 						.scale(scale)
 						.translate([chart.width / 2, chart.height / 2])
@@ -286,7 +292,7 @@
             //handles map zoom
             function zoomed() {
                 //update projection
-                if (chart.series[0].map === "USA") {
+                if (chart.series[0].map === "USA" || chart.series[0].map === "SC_USACounties") {
                     projection
 						.translate(zoom.translate())
 						.scale(zoom.scale());
