@@ -24,9 +24,7 @@ eve.pie({
 ```
 ###Contributors
 - Ismail Ozdemir
-- Onur Aytar
 - Utkucan Ari
-- Bilge Ozdemir
 
 ###Demos and Documentation
 http://eve.artgratis.com/
