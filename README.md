@@ -1,3 +1,5 @@
+[![Code Climate](https://codeclimate.com/github/ozdemiri/eve/badges/gpa.svg)](https://codeclimate.com/github/ozdemiri/eve)
+
 ![alt tag](https://dl.dropboxusercontent.com/u/36801868/eve.jpg)
 
 Eve is a simple visualization library including **charts** and **diagrams**.
@@ -11,13 +13,13 @@ Eve is a simple visualization library including **charts** and **diagrams**.
 ```javascript
 eve.pie({
   data: jsonData,
-  balloon: {
+  tooltip: {
     format: '<b>{title}</b>: {value}'
   },
+  xField: 'name',
   series: [
     {
-      titleField: 'name',
-      valueField: 'commits'
+      sizeField: 'commits'
     }
   ]
 });
@@ -26,5 +28,9 @@ eve.pie({
 - Ismail Ozdemir
 - Utkucan Ari
 
-###Demos and Documentation
-http://eve.artgratis.com/
+###Special Thanks
+[Pagos Inc.,](http://www.pagos.com)
+[Ugur Kadakal](https://github.com/ukadakal)
+
+###References and Showcase
+https://www.vysda.com
