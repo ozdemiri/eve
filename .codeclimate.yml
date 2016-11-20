@@ -6,8 +6,8 @@ engines:
     checks:
       guard-for-in:
         enabled: false
-      max-statements: [2, 60]
-      complexity: [2, 20]
+    max-statements: [2, 60]
+    complexity: [2, 20]
 ratings:
   paths:
     - "**.js"
