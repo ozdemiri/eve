@@ -1,0 +1,5 @@
+node_modules/
+report/
+npm-debug.log
+.vs/
+bower_components/

@@ -1,0 +1,483 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Pagos Visualziation Framework - Diagrams</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Load Css -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <link href="../bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="../bower_components/components-font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+    
+    <!-- Load JS -->
+    <script type="text/javascript" src="../bower_components/jquery/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="../bower_components/d3/d3.min.js"></script>
+    <script type="text/javascript" src="../bower_components/moment/min/moment.min.js"></script>
+    <script type="text/javascript" src="../bower_components/underscore/underscore-min.js"></script>
+    <script type="text/javascript" src="../bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../customlib/html2canvas.min.js"></script>
+    <script type="text/javascript" src="../dist/eve.min.js"></script>
+
+    <!-- Load External -->
+    <link href="../external/style.css" rel="stylesheet" />
+    <script src="../external/metisMenu/jquery.metisMenu.js"></script>
+    <script src="../external/slimscroll/jquery.slimscroll.min.js"></script>
+
+    <!-- Load Internal -->
+    <script type="text/javascript" src="index.js"></script>
+    <script type="text/javascript" src="datamanager.js"></script>
+</head>
+<body>
+    <div id="wrapper">
+        <!-- Navigation-->
+        <nav class="navbar-default navbar-static-side" role="navigation">
+            <div class="sidebar-collapse">
+                <ul class="nav metismenu" id="side-menu">
+                    <li class="nav-header">
+                        <div class="dropdown profile-element">
+                            <span class="text-brand">Pagos EVE</span>
+                            <br />
+                            <span class="text-small">A Visualization Framework</span>
+                        </div>
+                        <div class="logo-element">
+                            IN+
+                        </div>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fa fa-bar-chart-o"></i> <span class="nav-label">Charts</span> <span class="fa arrow"></span>
+                        </a>
+                        <ul class="nav nav-second-level collapse">
+                            <li>
+                                <a href="#">Area</a>
+                            </li>
+                            <li>
+                                <a href="#">Bar</a>
+                            </li>
+                            <li>
+                                <a href="#">Bubble</a>
+                            </li>
+                            <li>
+                                <a href="#">Column</a>
+                            </li>
+                            <li>
+                                <a href="#">Donut</a>
+                            </li>
+                            <li>
+                                <a href="#">Funnel</a>
+                            </li>
+                            <li>
+                                <a href="#">Line</a>
+                            </li>
+                            <li>
+                                <a href="#">Pie</a>
+                            </li>
+                            <li>
+                                <a href="#">Pyramid</a>
+                            </li>
+                            <li>
+                                <a href="#">Radar</a>
+                            </li>
+                            <li>
+                                <a href="#">Scatter</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="active">
+                        <a href="#">
+                            <i class="fa fa-superpowers"></i> <span class="nav-label">Diagrams</span> <span class="fa arrow"></span>
+                        </a>
+                        <ul class="nav nav-second-level collapse">
+                            <li>
+                                <a href="#">Abacus</a>
+                            </li>
+                            <li>
+                                <a href="#">Bullet</a>
+                            </li>
+                            <li>
+                                <a href="#">Bump</a>
+                            </li>
+                            <li>
+                                <a href="#">Calendarmap</a>
+                            </li>
+                            <li>
+                                <a href="#">Chord</a>
+                            </li>
+                            <li>
+                                <a href="#">Circle Clusters</a>
+                            </li>
+                            <li>
+                                <a href="#">Co-Occurence Matrix</a>
+                            </li>
+                            <li>
+                                <a href="#">Dendrogram</a>
+                            </li>
+                            <li>
+                                <a href="#">Force</a>
+                            </li>
+                            <li>
+                                <a href="#">Gantt</a>
+                            </li>
+                            <li>
+                                <a href="#">Gauge</a>
+                            </li>
+                            <li>
+                                <a href="#">Heatmap</a>
+                            </li>
+                            <li>
+                                <a href="#">Multiples</a>
+                            </li>
+                            <li>
+                                <a href="#">Network Matrix</a>
+                            </li>
+                            <li>
+                                <a href="#">Parallel Lines</a>
+                            </li>
+                            <li>
+                                <a href="#">Sankey</a>
+                            </li>
+                            <li>
+                                <a href="#">Streamgraph</a>
+                            </li>
+                            <li>
+                                <a href="#">Sunburst</a>
+                            </li>
+                            <li>
+                                <a href="#">Timeline</a>
+                            </li>
+                            <li>
+                                <a href="#">Treemap</a>
+                            </li>
+                            <li>
+                                <a href="#">Word Cloud</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fa fa-map-o"></i> <span class="nav-label">Maps</span> <span class="fa arrow"></span>
+                        </a>
+                        <ul class="nav nav-second-level collapse">
+                            <li>
+                                <a href="#">Location</a>
+                            </li>
+                            <li>
+                                <a href="#">Route</a>
+                            </li>
+                            <li>
+                                <a href="#">Standard</a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Content -->
+        <div id="page-wrapper" class="gray-bg">
+            <div class="row border-bottom top-breadcrump">
+                <h3 id="hVis">Calendarmap</h3>
+                <span id="spnDefinition">Creates a calendarmap.</span>
+            </div>
+            <div class="row">
+                <div class="col-lg-4 b-r option-handler height100">
+                    <div class="panel-group payments-method" id="accordion">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h5 class="panel-title">
+                                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse1">Animation</a>
+                                </h5>
+                            </div>
+                            <div id="collapse1" class="panel-collapse collapse">
+                                <div class="panel-body">
+                                    <form class="form-horizontal">
+                                        <p>Duration and delay should be set as milliseconds.</p>
+                                        <div class="form-group">
+                                            <label class="col-lg-3 control-label">Duration</label>
+                                            <div class="col-lg-9">
+                                                <input id="txtAnimDuration" type="text" class="form-control" value="500" />
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-lg-3 control-label">Delay</label>
+                                            <div class="col-lg-9">
+                                                <input id="txtAnimDelay" type="text" class="form-control" value="10" />
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-lg-3 control-label">Easing Type</label>
+                                            <div class="col-lg-9">
+                                                <select id="cmbAnimEasing" class="form-control">
+                                                    <option selected value="linear">linear</option>
+                                                    <option value="quadIn">quadIn</option>
+                                                    <option value="quadOut">quadOut</option>
+                                                    <option value="quadInOut">quadInOut</option>
+                                                    <option value="cubicIn">cubicIn</option>
+                                                    <option value="cubicOut">cubicOut</option>
+                                                    <option value="cubicInOut">cubicInOut</option>
+                                                    <option value="polyIn">polyIn</option>
+                                                    <option value="polyOut">polyOut</option>
+                                                    <option value="polyInOut">polyInOut</option>
+                                                    <option value="sinIn">sinIn</option>
+                                                    <option value="sinOut">sinOut</option>
+                                                    <option value="sinInOut">sinInOut</option>
+                                                    <option value="expIn">expIn</option>
+                                                    <option value="expOut">expOut</option>
+                                                    <option value="expInOut">expInOut</option>
+                                                    <option value="circleIn">circleIn</option>
+                                                    <option value="circleOut">circleOut</option>
+                                                    <option value="circleInOut">circleInOut</option>
+                                                    <option value="bounceIn">bounceIn</option>
+                                                    <option value="bounceOut">bounceOut</option>
+                                                    <option value="bounceInOut">bounceInOut</option>
+                                                    <option value="backIn">backIn</option>
+                                                    <option value="backOut">backOut</option>
+                                                    <option value="backInOut">backInOut</option>
+                                                    <option value="elasticIn">elasticIn</option>
+                                                    <option value="elasticOut">elasticOut</option>
+                                                    <option value="elasticInOut">elasticInOut</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h5 class="panel-title">
+                                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse2">Border</a>
+                                </h5>
+                            </div>
+                            <div id="collapse2" class="panel-collapse collapse">
+                                <div class="panel-body">
+                                    <form class="form-horizontal">
+                                        <div class="form-group">
+                                            <label class="col-lg-3 control-label">Color</label>
+                                            <div class="col-lg-9">
+                                                <input id="txtBorderColor" type="text" class="form-control" value="transparent" />
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-lg-3 control-label">Size</label>
+                                            <div class="col-lg-9">
+                                                <input id="txtBorderSize" type="text" class="form-control" value="0" />
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-lg-3 control-label">Type</label>
+                                            <div class="col-lg-9">
+                                                <select id="cmbBorderType" class="form-control">
+                                                    <option value="solid">solid</option>
+                                                    <option value="dotted">dotted</option>
+                                                    <option value="dashed">dashed</option>
+                                                    <option value="double">double</option>
+                                                    <option value="groove">groove</option>
+                                                    <option value="ridge">ridge</option>
+                                                    <option value="inset">inset</option>
+                                                    <option value="outset">outset</option>
+                                                    <option value="none" selected>none</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h5 class="panel-title">
+                                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse3">Legend</a>
+                                </h5>
+                            </div>
+                            <div id="collapse3" class="panel-collapse collapse">
+                                <div class="panel-body">
+                                    <form class="form-horizontal">
+                                        <div class="form-group">
+                                            <label class="col-lg-3 control-label">Enabled</label>
+                                            <div class="col-lg-9">
+                                                <select id="cmbLegendEnabled" class="form-control">
+                                                    <option selected value="yes">yes</option>
+                                                    <option value="no">no</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-lg-3 control-label">Type</label>
+                                            <div class="col-lg-9">
+                                                <select id="cmbLegendType" class="form-control">
+                                                    <option selected value="default">default</option>
+                                                    <option value="ranged">ranged</option>
+                                                    <option value="gradient">gradient</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-lg-3 control-label">Icon Type</label>
+                                            <div class="col-lg-9">
+                                                <select id="cmbLegendIcon" class="form-control">
+                                                    <option selected value="square">square</option>
+                                                    <option value="circle">circle</option>
+                                                    <option value="cross">cross</option>
+                                                    <option value="diamond">diamond</option>
+                                                    <option value="star">star</option>
+                                                    <option value="triangle">triangle</option>
+                                                    <option value="wye">wye</option>
+                                                    <!-- <option value="image:ball.png">Custom (Ball.png)</option> -->
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-lg-3 control-label">Icon Color</label>
+                                            <div class="col-lg-9">
+                                                <input id="txtLegendIconColor" type="text" class="form-control" value="" />
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-lg-3 control-label">Position</label>
+                                            <div class="col-lg-9">
+                                                <select id="cmbLegendPosition" class="form-control">
+                                                    <option selected value="right">right</option>
+                                                    <option value="left">left</option>
+                                                    <option value="top">top</option>
+                                                    <option value="bottom">bottom</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-lg-3 control-label">Font Color</label>
+                                            <div class="col-lg-9">
+                                                <input id="txtLegendFontColor" type="text" class="form-control" value="#333333" />
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-lg-3 control-label">Font Family</label>
+                                            <div class="col-lg-9">
+                                                <select id="cmbLegendFontFamily" class="form-control">
+                                                    <option selected value="Tahoma">Tahoma</option>
+                                                    <option value="Arial">Arial</option>
+                                                    <option value="Helvetica">Helvetica</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-lg-3 control-label">Font Size</label>
+                                            <div class="col-lg-9">
+                                                <input id="txtLegendFontSize" type="text" class="form-control" value="12" />
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-lg-3 control-label">Font Style</label>
+                                            <div class="col-lg-9">
+                                                <select id="cmbLegendFontStyle" class="form-control">
+                                                    <option selected value="normal">normal</option>
+                                                    <option value="bold">bold</option>
+                                                    <option value="italic">italic</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h5 class="panel-title">
+                                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse8">Serie</a>
+                                </h5>
+                            </div>
+                            <div id="collapse8" class="panel-collapse collapse">
+                                <div class="panel-body">
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h5 class="panel-title">
+                                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse4">Title</a>
+                                </h5>
+                            </div>
+                            <div id="collapse4" class="panel-collapse collapse">
+                                <div class="panel-body">
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h5 class="panel-title">
+                                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse5">Tooltip</a>
+                                </h5>
+                            </div>
+                            <div id="collapse5" class="panel-collapse collapse">
+                                <div class="panel-body">
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h5 class="panel-title">
+                                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse9">Trends</a>
+                                </h5>
+                            </div>
+                            <div id="collapse9" class="panel-collapse collapse">
+                                <div class="panel-body">
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h5 class="panel-title">
+                                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse6">X Axis</a>
+                                </h5>
+                            </div>
+                            <div id="collapse6" class="panel-collapse collapse">
+                                <div class="panel-body">
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h5 class="panel-title">
+                                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse7">Y Axis</a>
+                                </h5>
+                            </div>
+                            <div id="collapse7" class="panel-collapse collapse">
+                                <div class="panel-body">
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row border-top">
+                        <div class="col-lg-12">
+                            <form class="form-inline">
+                                <div class="form-group-inline">
+                                    <label>Update every </label>
+                                    &nbsp;
+                                    <input id="txtUpdateDuration" type="text" class="form-control" value="0">
+                                    &nbsp;
+                                    <label>seconds</label>
+                                </div>
+                            </form>
+                            <br />
+                            <button id="btnUpdate" class="btn btn-success">Set Update Mode</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-8 height100">
+                    <br />
+                    <div id="dvVisualization">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
