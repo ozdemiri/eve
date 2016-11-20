@@ -10,6 +10,14 @@ engines:
         enabled: false
       no-eval:
         enabled: false
+      no-loop-func:
+        enabled: false
+      eqeqeq:
+        enabled: false
+      wrap-iife:
+        enabled: false
+      radix:
+        enabled: false
 ratings:
   paths:
     - "**.js"
