@@ -1,8 +1,10 @@
-JavaScript: true
-Ruby: true
-Python: false
-PHP: false
-
+engines:
+  fixme:
+    enabled: false
+  eslint:
+    enabled: true
+ratings:
+  paths:
+    - "**.js"
 exclude_paths:
-- test/**/*
-- vendor/**/*
+- "node_modules/"
