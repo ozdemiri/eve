@@ -3,8 +3,18 @@ engines:
     enabled: false
   eslint:
     enabled: true
+    checks:
+      guard-for-in:
+        enabled: false
+      max-statements: [2, 60]
+      complexity: [2, 20]
 ratings:
   paths:
     - "**.js"
 exclude_paths:
 - "node_modules/"
+- "customlib/"
+- "external/"
+- "bower_components/"
+- "test/"
+- "samples/"
