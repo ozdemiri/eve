@@ -23,7 +23,7 @@
             pieWidth = (chart.plot.width - chart.plot.left - chart.plot.right),
             pieHeight = (chart.plot.height - chart.plot.top - chart.plot.bottom),
             transX = (chart.width - chart.plot.left - chart.plot.right) / 2,
-            transY = pieHeight / 2,
+            transY = chart.plot.top + pieHeight / 2,
             outerRadius = Math.min(pieWidth, pieHeight) / 2,
             innerRadius = 0,
             arc = d3.arc().outerRadius(outerRadius).innerRadius(innerRadius),
@@ -57,6 +57,9 @@
             if (currentSerie.colorField !== '') {
                 d._sliceColor = d[currentSerie.colorField];
                 zeroDataSet[i]._sliceColor = d[currentSerie.colorField];
+            } else if (currentSerie.dataColors) {
+                d._sliceColor = currentSerie.dataColors[d[chart.xField].toString()];
+                zeroDataSet[i]._sliceColor = currentSerie.dataColors[d[chart.xField].toString()];
             }
 
             //iterate all keys in current data

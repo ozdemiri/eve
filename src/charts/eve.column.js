@@ -14,6 +14,9 @@
 (function(e) {
     //define column chart class
     function columnChart(options) {
+        //froze x axis
+        options.frozenXAxis = 'string';
+
         //declare needed variables
         var that = this,
             chart = eve.base.init(options),
@@ -38,10 +41,10 @@
 
         //animates columns
         function animateColumns(isStacked) {
-            if(isStacked) {
-                //calculate diff min base
-                diffMinBase = Math.abs(axis.yScale(0) - axis.yScale(chart.domains.y[0]));
+            //calculate diff min base
+            diffMinBase = Math.abs(axis.yScale(0) - axis.yScale(chart.domains.y[0]));
 
+            if(isStacked) {
                 //animate column chart
                 columnRects
                     .transition(chart.animation.duration)
@@ -49,14 +52,17 @@
                     .delay(function(d, i) { return i * chart.animation.delay; })
                     .attr('x', function (d) { return axis.xScale(d.data[xField]); })
                     .attr('y', function (d) {
-                        if (chart.series.length === 1)
-                            return d[1] < 0 ? axis.yScale(d[0]) : axis.yScale(d[1]);
-                        return d[1] < 0 ? axis.yScale(d[0]) : axis.yScale(d[1]) - diffMinBase; 
+                        return d[1] < 0 ? axis.yScale(d[0]) : axis.yScale(d[1]) - (chart.series.length === 1 ? 0 : diffMinBase);
                     })
-                    .attr('height', function(d) { 
-                        if (chart.series.length === 1)
-                            return Math.abs(axis.yScale(d[0]) - axis.yScale(d[1])) - diffMinBase;
-                        return Math.abs(axis.yScale(d[0]) - axis.yScale(d[1]));
+                    .attr('height', function (d) {
+                        if (chart.series.length === 1) {
+                            if (chart.domains.y[0] < 0)
+                                return Math.abs(axis.yScale(d[0]) - axis.yScale(d[1]));
+                            else
+                                return Math.abs(axis.yScale(d[0]) - axis.yScale(d[1]) - diffMinBase);
+                        } else {
+                            return Math.abs(axis.yScale(d[0]) - axis.yScale(d[1]));
+                        }
                     })
                     .attr('width', axis.xScale.bandwidth());
             } else {
@@ -66,9 +72,16 @@
                     .ease(chart.animation.easing.toEasing())
                     .delay(function(d, i) { return i * chart.animation.delay; })
                     .attr('width', singleGroupWidth)
-                    .attr('height', function(d, i) { return axis.yScale(chart.domains.y[0]) - axis.yScale(d.data[d.name]); })
+                    .attr('height', function (d, i) {
+                        if (d.data[d.name] < 0)
+                            return Math.abs(axis.yScale(d.data[d.name]) - axis.yScale(chart.domains.y[0]) - diffMinBase);
+                        else
+                            return Math.abs(axis.yScale(0) - axis.yScale(d.data[d.name]));
+                    })
                     .attr('x', function(d) { return groupAxis(d.name); })
-                    .attr('y', function(d) { return axis.yScale(d.data[d.name]); });
+                    .attr('y', function (d) {
+                        return d.data[d.name] > 0 ? axis.yScale(d.data[d.name]) : axis.yScale(0);
+                    });
             }
         }
 

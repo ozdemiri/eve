@@ -187,14 +187,8 @@
             //update legend
             diagram.updateLegend();
 
-            //update circles data
-            circles.data(root.descendants()).exit().remove();
-
-            //set selcted node
-            selectedNode = diagramG.selectAll('circle');
-
-            //zoom
-            zoomTo([root.x, root.y, root.r * 2 + margin]);
+            circles.remove();
+            initDiagram();
         };
 
         //draws the chart into a canvas

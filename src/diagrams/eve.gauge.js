@@ -57,6 +57,9 @@
             handleLine = null,
             hasHeader = currentSerie.title !== '',
             headerHeight = height / textOffset,
+            negativePercent = 0,
+            positivePercent = 0,
+            posX, bwp,
             baseColor = currentSerie.color ? currentSerie.color : e.colors[0],
             p1, p2;
         
@@ -449,6 +452,82 @@
                 .attr('y', (height / 2) + valueTextSize);
         }
 
+        //initializes linear gauge
+        function linear() {
+            //create base rectangle
+            diagramG.append('rect')
+                .attr('width', width)
+                .attr('height', height)
+                .style('fill', 'transparent')
+                .attr('x', 0).attr('y', 0)
+                .attr('rx', 5).attr('ry', 5);
+
+            //check range
+            if (currentSerie.minRange < 0) {
+                //set needed variables
+                currentRange = currentSerie.maxRange - currentSerie.minRange;
+                negativePercent = Math.abs(currentSerie.minRange) / currentRange;
+                positivePercent = Math.abs(currentSerie.maxRange) / currentRange;
+                bwp = Math.abs(value) / currentRange * 100;
+
+                //check value direction
+                if (value > 0) {
+                    //calculate envrionment
+                    posX = width * negativePercent;
+
+                    //create rectangle
+                    handleSVG = diagramG.append('rect')
+                        .style('fill', baseColor)
+                        .style('fill-opacity', currentSerie.alpha)
+                        .attr('y', 0)
+                        .attr('height', height)
+                        .attr('x', width / 2)
+                        .attr('width', 0);
+
+                    handleSVG
+                        .transition(diagram.animation.duration)
+                        .ease(diagram.animation.easing.toEasing())
+                        .delay(function (d, i) { return i * diagram.animation.delay; })
+                        .attr('x', posX)
+                        .attr('width', width * bwp / 100);
+                } else {
+                    //calculate envrionment
+                    posX = (width * negativePercent) - (width * bwp / 100);
+
+                    //create rectangle
+                    handleSVG = diagramG.append('rect')
+                        .style('fill', currentSerie.negativeColor)
+                        .style('fill-opacity', currentSerie.alpha)
+                        .attr('y', 0)
+                        .attr('height', height)
+                        .attr('x', width / 2)
+                        .attr('width', 0);
+
+                    handleSVG
+                        .transition(diagram.animation.duration)
+                        .ease(diagram.animation.easing.toEasing())
+                        .delay(function (d, i) { return i * diagram.animation.delay; })
+                        .attr('x', posX)
+                        .attr('width', width * bwp / 100);
+                }
+            } else {
+                //create rectangle
+                handleSVG = diagramG.append('rect')
+                    .style('fill', baseColor)
+                    .style('fill-opacity', currentSerie.alpha)
+                    .attr('x', 0)
+                    .attr('y', 0)
+                    .attr('width', 0)
+                    .attr('height', height);
+
+                handleSVG
+                    .transition(diagram.animation.duration)
+                    .ease(diagram.animation.easing.toEasing())
+                    .delay(function (d, i) { return i * diagram.animation.delay; })
+                    .attr('width', width * percentValue / 100);
+            }
+        }
+
         //initializes bullet gauge
         function bullet() {
 
@@ -473,6 +552,9 @@
             case 'bullet':
                 bullet();
                 break;
+            case 'linear':
+                linear();
+                break;
         }
 
         //update diagram
@@ -482,7 +564,7 @@
             diagram.data = data;
             value = data;
             percentValue = getPercentValue(value);
-
+            
             //check gauge type
             switch (type) {
                 case 'standard':
@@ -535,6 +617,53 @@
                                     d3.select(textObj).text(interpolate(t).toFixed(2));
                                 };
                             });
+                    }
+                    break;
+                case 'linear':
+                    {
+                        //check whether the min range < 0
+                        if (currentSerie.minRange < 0) {
+                            //update bwp
+                            bwp = Math.abs(value) / currentRange * 100;
+
+                            //check current value < 0
+                            if (value > 0) {
+                                //update handle
+                                handleSVG
+                                    .attr('x', width / 2)
+                                    .attr('width', 0)
+                                    .style('fill', baseColor)
+                                    .transition(diagram.animation.duration)
+                                    .ease(diagram.animation.easing.toEasing())
+                                    .delay(function (d, i) { return i * diagram.animation.delay; })
+                                    .attr('x', posX)
+                                    .attr('width', width * bwp / 100);
+                            } else {
+                                //calculate envrionment
+                                posX = (width * negativePercent) - (width * bwp / 100);
+
+                                //update handle
+                                handleSVG
+                                    .attr('x', width / 2)
+                                    .attr('width', 0)
+                                    .style('fill', currentSerie.negativeColor)
+                                    .transition(diagram.animation.duration)
+                                    .ease(diagram.animation.easing.toEasing())
+                                    .delay(function (d, i) { return i * diagram.animation.delay; })
+                                    .attr('x', posX)
+                                    .attr('width', width * bwp / 100);
+                            }
+                        } else {
+                            //update handle
+                            handleSVG
+                                .attr('x', 0)
+                                .attr('width', 0)
+                                .transition(diagram.animation.duration)
+                                .ease(diagram.animation.easing.toEasing())
+                                .delay(function (d, i) { return i * diagram.animation.delay; })
+                                .attr('x', posX)
+                                .attr('width', width * percentValue / 100);
+                        }
                     }
                     break;
             }
@@ -592,6 +721,12 @@
     e.digitalGauge = function (options) {
         options.type = '';
         return new gauge(options, 'digital');
+    };
+
+    //attach linear gauge method into the eve
+    e.linearGauge = function (options) {
+        options.type = '';
+        return new gauge(options, 'linear');
     };
 
     //attach dial gauge method into the eve

@@ -107,6 +107,9 @@
                                 });
                             }
                         });
+
+                        //set legend values
+                        chart.legendValues = legendValues;
                     }
                     break;
                 case 'grouped':
@@ -178,6 +181,25 @@
                         chart.legendValues = legendValues;
                     }
                     break;
+                case 'manual':
+                    {
+                        //iterate all group values
+                        chart.manualLegendValues.forEach(function (d, i) {
+                            //add current value into the legend values
+                            legendValues.push({
+                                value: d.toString(),
+                                length: d.toString().length,
+                                color: i > e.colors.length ? e.randColor() : e.colors[i]
+                            });
+                        });
+
+                        //sort legendValues
+                        legendValues.sort(function (a, b) { if (a.value < b.value) { return -1; } if (a.value > b.value) { return 1; } return 0; });
+
+                        //set legend values
+                        chart.legendValues = legendValues;
+                    }
+                    break;
                 default:
                     {
                         //sort data
@@ -207,6 +229,9 @@
                                 color: serie.color
                             });
                         });
+
+                        //set legend values
+                        chart.legendValues = legendValues;
                     }
                     break;
             }
@@ -353,6 +378,9 @@
                                 });
                             }
                         });
+
+                        //set legend values
+                        chart.legendValues = newChartSeries;
                     }
                     break;
                 case 'grouped':
@@ -384,6 +412,28 @@
 
                         //sort chartSeries
                         newChartSeries.sort(function (a, b) { if (a.value < b.value) { return -1; } if (a.value > b.value) { return 1; } return 0; });
+
+                        //set legend values
+                        chart.legendValues = newChartSeries;
+                    }
+                    break;
+                case 'manual':
+                    {
+                        //iterate all group values
+                        chart.manualLegendValues.forEach(function (d, i) {
+                            //add current value into the legend values
+                            newChartSeries.push({
+                                value: d.toString(),
+                                length: d.toString().length,
+                                color: i > e.colors.length ? e.randColor() : e.colors[i]
+                            });
+                        });
+
+                        //sort legendValues
+                        newChartSeries.sort(function (a, b) { if (a.value < b.value) { return -1; } if (a.value > b.value) { return 1; } return 0; });
+
+                        //set legend values
+                        chart.legendValues = newChartSeries;
                     }
                     break;
                 case 'map':
@@ -453,6 +503,9 @@
                                 });
                             }
                         });
+
+                        //set legend values
+                        chart.legendValues = newChartSeries;
                     }
                     break;
             }
@@ -929,8 +982,8 @@
             //create scaled legend data
             for (i = 0; i < chart.legend.circleCount; i++) {
                 legendScaledValues.push({
-                    value: (chart.domains.y[1] - band * i).toFixed(0),
-                    radius: rscale((chart.domains.y[1] - band * i).toFixed(0))
+                    value: (chart.domains.y[1] - band * i).toFixed(2),
+                    radius: rscale((chart.domains.y[1] - band * i).toFixed(2))
                 });
             }
 
@@ -1303,7 +1356,7 @@
             legendScaledSVG.attr('transform', function (d, i) {
                 //set x and y position
                 yPos = yStartingPoint + (chart.series[0].tileIcon === 'square' ? chart.series[0].maxBulletSize - d.radius * 2 : chart.series[0].maxBulletSize - d.radius);
-                xPos = xStartingPoint + (chart.series[0].tileIcon === 'square' ? 0 : chart.series[0].maxBulletSize);
+                xPos = xStartingPoint + (chart.series[0].tileIcon === 'square' ? ((chart.series[0].maxBulletSize - d.radius) * 2) : chart.series[0].maxBulletSize);
 
                 //return translation for the current icon
                 return 'translate(' + xPos + ', ' + yPos + ')';
@@ -1311,7 +1364,7 @@
 
             //transform legend lines
             legendScaledLineSVG
-                .attr('x1', xStartingPoint + (chart.series[0].tileIcon === 'square' ? 0 : chart.series[0].maxBulletSize))
+                .attr('x1', xStartingPoint + (chart.series[0].tileIcon === 'square' ? chart.series[0].maxBulletSize * 2 : chart.series[0].maxBulletSize))
                 .attr('y1', function (d, i) { return yStartingPoint + chart.series[0].maxBulletSize - d.radius * 2; })
                 .attr('x2', xStartingPoint + chart.series[0].maxBulletSize * 2 + legendIconOffset)
                 .attr('y2', function (d, i) { return yStartingPoint + chart.series[0].maxBulletSize - d.radius * 2; });
@@ -1405,8 +1458,8 @@
 
             //create scaled legend data
             for (i = 0; i < chart.legend.circleCount; i++) {
-                legendScaledValues[i].value = (chart.domains.y[1] - band * i).toFixed(0);
-                legendScaledValues[i].radius = rscale((chart.domains.y[1] - band * i).toFixed(0));
+                legendScaledValues[i].value = (chart.domains.y[1] - band * i).toFixed(2);
+                legendScaledValues[i].radius = rscale((chart.domains.y[1] - band * i).toFixed(2));
             }
 
 
@@ -1561,8 +1614,8 @@
                             .attr("r", function (d) { return d.radius; })
                             .attr('transform', function (d, i) {
                                 //set x and y position
-                                yPos = yStartingPoint + (chart.series[0].tileIcon === 'square' ? chart.series[0].maxBulletSize - d.radius * 2 : chart.series[0].maxBulletSize - d.radius);
-                                xPos = xStartingPoint + (chart.series[0].tileIcon === 'square' ? 0 : chart.series[0].maxBulletSize);
+                                yPos = yStartingPoint + chart.series[0].maxBulletSize - d.radius;
+                                xPos = xStartingPoint + chart.series[0].maxBulletSize;
 
                                 //return translation for the current icon
                                 return 'translate(' + xPos + ', ' + yPos + ')';
@@ -1579,8 +1632,8 @@
                             .attr('height', function (d) { return d.radius * 2; })
                             .attr('transform', function (d, i) {
                                 //set x and y position
-                                yPos = yStartingPoint + (chart.series[0].tileIcon === 'square' ? chart.series[0].maxBulletSize - d.radius * 2 : chart.series[0].maxBulletSize - d.radius);
-                                xPos = xStartingPoint + (chart.series[0].tileIcon === 'square' ? 0 : chart.series[0].maxBulletSize);
+                                yPos = yStartingPoint + chart.series[0].maxBulletSize - d.radius * 2;
+                                xPos = xStartingPoint + (chart.series[0].maxBulletSize - d.radius) * 2;
 
                                 //return translation for the current icon
                                 return 'translate(' + xPos + ', ' + yPos + ')';
@@ -1596,8 +1649,8 @@
                             .attr("r", function (d) { return d.radius; })
                             .attr('transform', function (d, i) {
                                 //set x and y position
-                                yPos = yStartingPoint + (chart.series[0].tileIcon === 'square' ? chart.series[0].maxBulletSize - d.radius * 2 : chart.series[0].maxBulletSize - d.radius);
-                                xPos = xStartingPoint + (chart.series[0].tileIcon === 'square' ? 0 : chart.series[0].maxBulletSize);
+                                yPos = yStartingPoint + chart.series[0].maxBulletSize - d.radius;
+                                xPos = xStartingPoint + chart.series[0].maxBulletSize;
 
                                 //return translation for the current icon
                                 return 'translate(' + xPos + ', ' + yPos + ')';
@@ -1613,7 +1666,7 @@
             legendScaledLineSVG
                 .transition(chart.animation.duration)
                 .ease(chart.animation.easing.toEasing())
-                .attr('x1', xStartingPoint + (chart.series[0].tileIcon === 'square' ? 0 : chart.series[0].maxBulletSize))
+                .attr('x1', xStartingPoint + (chart.series[0].tileIcon === 'square' ? chart.series[0].maxBulletSize * 2 : chart.series[0].maxBulletSize))
                 .attr('y1', function (d, i) { return yStartingPoint + chart.series[0].maxBulletSize - d.radius * 2; })
                 .attr('x2', xStartingPoint + chart.series[0].maxBulletSize * 2 + legendIconOffset)
                 .attr('y2', function (d, i) { return yStartingPoint + chart.series[0].maxBulletSize - d.radius * 2; });

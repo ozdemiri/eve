@@ -147,12 +147,8 @@
                 //set serie data index
                 serieData.index = serieIndex;
                 serieData.name = serieName;
-                serieData.minSize = d3.min(chart.data, function(d) {
-                    return d[chart.series[serieIndex].sizeField];
-                });
-                serieData.maxSize = d3.max(chart.data, function(d) {
-                    return d[chart.series[serieIndex].sizeField];
-                });
+                serieData.minSize = d3.min(chart.data, function(d) { return +d[chart.series[serieIndex].sizeField]; });
+                serieData.maxSize = d3.max(chart.data, function(d) { return +d[chart.series[serieIndex].sizeField]; });
 
                 //push the current serie data into the current dataset
                 currentDataSet.push(serieData);

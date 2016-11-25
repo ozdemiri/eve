@@ -31,6 +31,10 @@
             options.yAxis.stacked = false;
         }
 
+        //froze x as stirng
+        options.frozenXAxis = 'string';
+        options.frozenMaxY = true;
+
         //declare needed variables
         var diagram = eve.base.init(options),
             axis = eve.base.createAxis(diagram),
@@ -44,6 +48,11 @@
             currentSerie = null,
             currentSerieIndex = -1,
             bulletSize = diagram.series[0].bulletSize < 16 ? 16 : diagram.series[0].bulletSize,
+            currentWidth = 0,
+            currentX1 = 0,
+            currentX2 = 0,
+            minXPos = 0,
+            maxXPos = 0,
             guideLineSize = bulletSize / 3;
 
         //create diagram g
@@ -76,6 +85,10 @@
             //return translation
             return 'translate(' + xPos + ',' + yPos + ')';
         };
+
+        //gets and sets min and max x pos
+        minXPos = axis.xScale(diagram.domains.y[0]);
+        maxXPos = axis.xScale(diagram.domains.y[1]);
 
         //animates abacus diagram
         var animateAbacus = function () {
@@ -128,16 +141,69 @@
 
                             //check whether the next measure is not empty
                             if (nextMeasure) {
-                                //get proper measure index
-                                return axis.xScale(parseFloat(currentMeasure.value)) + bulletSize / 2;
+                                //get x1 value from axis
+                                currentX1 = axis.xScale(parseFloat(currentMeasure.value));
+
+                                //check whether the current x1 > maxxpos
+                                if (currentX1 > maxXPos)
+                                    return maxXPos;
+
+                                //check whether the current x value is less than plot left
+                                return currentX1 < minXPos ? minXPos : currentX1 + bulletSize / 2;
                             } else {
                                 //there is no next meausure so remove
                                 return 0;
                             }
                         })
+                        .style('stroke-dasharray', function (d, i) {
+                            //get current measure value
+                            currentMeasure = d;
+                            nextMeasure = dataColumns[i + 1];
+
+                            //check whether the next measure is not empty
+                            if (nextMeasure) {
+                                //get x1 and x2 value from axis
+                                currentX1 = axis.xScale(parseFloat(currentMeasure.value));
+                                currentX2 = axis.xScale(parseFloat(nextMeasure.value));
+
+                                //check whether the current x value is less than plot left
+                                if (currentX1 < minXPos || currentX2 > maxXPos)
+                                    return '5, 2';
+                                else
+                                    return '0';
+                            } else {
+                                //there is no next meausure so remove
+                                return '0';
+                            }
+                        })
                         .transition(diagram.animation.duration)
                         .ease(diagram.animation.easing.toEasing())
                         .delay(function (d, i) { return i * diagram.animation.delay; })
+                        .style('stroke-opacity', function (d, i) {
+                            //get current measure value
+                            currentMeasure = d;
+                            nextMeasure = dataColumns[i + 1];
+
+                            //check whether the next measure is not empty
+                            if (nextMeasure) {
+                                //get x1 and x2 value from axis
+                                currentX1 = axis.xScale(parseFloat(currentMeasure.value));
+                                currentX2 = axis.xScale(parseFloat(nextMeasure.value));
+
+                                //get proper measure index
+                                currentWidth = currentX2 - currentX1;
+                                
+                                //check whether the both x values less than min x pos
+                                if (currentX1 < minXPos && currentX2 < minXPos)
+                                    return 0;
+
+                                //remove stroke if not available
+                                return currentWidth > bulletSize ? 1 : 0;
+                            } else {
+                                //there is no next meausure so remove
+                                return 0;
+                            }
+                        })
                         .attr('x2', function (d, i) {
                             //get current measure value
                             currentMeasure = d;
@@ -145,8 +211,11 @@
 
                             //check whether the next measure is not empty
                             if (nextMeasure) {
+                                //get x2 value from axis
+                                currentX2 = axis.xScale(parseFloat(nextMeasure.value));
+
                                 //get proper measure index
-                                return axis.xScale(parseFloat(nextMeasure.value)) - bulletSize / 2;
+                                return currentX2 > maxXPos ? maxXPos : currentX2 - bulletSize / 2;
                             } else {
                                 //there is no next meausure so remove
                                 return 0;
@@ -154,18 +223,28 @@
                         });
                 });
 
-                //select current serie bullets
-                diagramG.selectAll('.eve-abacus-bullet-' + serieIndex)
-                    .transition(diagram.animation.duration)
-                    .ease(diagram.animation.easing.toEasing())
-                    .delay(function (d, i) { return i * diagram.animation.delay; })
-                    .attr('fill-opacity', function (d) {
-                        if (!d[currentSerie.yField])
-                            return 0;
-                        return 1;
-                    })
-                    .attr('fill', function (d, i) {
-                        if (currentSerie.bullet.indexOf('image:') === -1) {
+                if (currentSerie.bullet.indexOf('image:') === -1) {
+                    //create scatter bullets
+                    diagramG.selectAll('.eve-abacus-bullet-' + serieIndex)
+                        .data(currentDataSet[serieIndex])
+                        .enter().append('path')
+                        .attr('class', 'eve-abacus-bullets eve-abacus-bullet-' + serieIndex)
+                        .attr('d', bulletF)
+                        .attr('stroke-opacity', currentSerie.bulletStrokeAlpha)
+                        .attr('stroke-width', currentSerie.bulletStrokeSize)
+                        .attr('fill-opacity', function (d, i) {
+                            //get x1 and x2 value from axis
+                            currentX1 = axis.xScale(d[currentSerie.yField])
+                            
+                            //check whetehr the current x position less than min
+                            if (currentX1 < minXPos)
+                                return 0;
+                            else if (currentX1 > maxXPos)
+                                return 0;
+                            else
+                                return d[currentSerie.yField] ? 1 : 0;
+                        })
+                        .attr('fill', function (d, i) {
                             //check columns to set fill color
                             if (currentSerie.colorField && currentSerie.colorField !== '')
                                 return d.data[currentSerie.colorField];
@@ -173,9 +252,71 @@
                                 return d.data[currentSerie.bulletColor];
                             else
                                 return currentSerie.color;
-                        }
-                    })
-                    .attr('transform', function (d) { return getBulletTransform(d, false); });
+                        })
+                        .attr('transform', function (d) { return getBulletTransform(d, true); })
+                        .on('click', function (d) { if (diagram.sliceClick) diagram.sliceClick(d.data); })
+                        .on('mousemove', function (d, i) {
+                            //get x1 and x2 value from axis
+                            currentX1 = axis.xScale(d[currentSerie.yField])
+
+                            //check whetehr the current x position less than min
+                            if (currentX1 < minXPos)
+                                return;
+                            else if (currentX1 > maxXPos)
+                                return;
+
+                            //set slice hover
+                            d3.select(this).attr('fill-opacity', currentSerie.sliceHoverAlpha);
+
+                            //show tooltip
+                            diagram.showTooltip(diagram.getContent(d, currentSerie, diagram.tooltip.format));
+                        })
+                        .on('mouseout', function (d, i) { diagram.hideTooltip(); })
+                        .transition(diagram.animation.duration)
+                        .ease(diagram.animation.easing.toEasing())
+                        .delay(function (d, i) { return i * diagram.animation.delay; })
+                        .attr('transform', function (d) { return getBulletTransform(d, false); });
+                } else {
+                    //create scatter bullets
+                    diagramG.selectAll('.eve-abacus-bullet-' + serieIndex)
+                        .data(currentDataSet[serieIndex])
+                        .enter().append('svg:image')
+                        .attr('class', 'eve-abacus-bullets eve-abacus-bullet-' + serieIndex)
+                        .attr('xlink:href', currentSerie.bullet.replace('image:', ''))
+                        .attr('fill-opacity', function (d, i) {
+                            //get x1 and x2 value from axis
+                            currentX1 = axis.xScale(d[currentSerie.yField])
+
+                            //check whetehr the current x position less than min
+                            if (currentX1 < minXPos)
+                                return 0;
+                            else if (currentX1 > maxXPos)
+                                return 0;
+                            else
+                                return d[currentSerie.yField] ? 1 : 0;
+                        })
+                        .attr('width', currentSerie.bulletSize)
+                        .attr('height', currentSerie.bulletSize)
+                        .attr('transform', function (d) { return getBulletTransform(d, true); })
+                        .on('mousemove', function (d, i) {
+                            //get x1 and x2 value from axis
+                            currentX1 = axis.xScale(d[currentSerie.yField])
+
+                            //check whetehr the current x position less than min
+                            if (currentX1 < minXPos)
+                                return;
+                            else if (currentX1 > maxXPos)
+                                return;
+
+                            //show tooltip
+                            diagram.showTooltip(diagram.getContent(d, currentSerie, diagram.tooltip.format));
+                        })
+                        .on('mouseout', function (d, i) { diagram.hideTooltip(); })
+                        .transition(diagram.animation.duration)
+                        .ease(diagram.animation.easing.toEasing())
+                        .delay(function (d, i) { return i * diagram.animation.delay; })
+                        .attr('transform', function (d) { return getBulletTransform(d, false); });
+                }
             });
         };
 
@@ -244,76 +385,6 @@
         //update data sereis
         updateDataSeries();
 
-        //iterate all series to create abacus bullets
-        diagram.series.forEach(function (currentSerie, serieIndex) {
-            //check whether the current serie bullet is not image
-            if (currentSerie.bullet.indexOf('image:') === -1) {
-                //create scatter bullets
-                diagramG.selectAll('.eve-abacus-bullet-' + serieIndex)
-                    .data(currentDataSet[serieIndex])
-                    .enter().append('path')
-                    .attr('class', 'eve-abacus-bullets eve-abacus-bullet-' + serieIndex)
-                    .attr('d', bulletF)
-                    .attr('stroke-opacity', currentSerie.bulletStrokeAlpha)
-                    .attr('stroke-width', currentSerie.bulletStrokeSize)
-                    .attr('fill-opacity', function (d) {
-                        if (!d[currentSerie.yField])
-                            return 0;
-                        return 1;
-                    })
-                    .attr('fill', function (d, i) {
-                        //check columns to set fill color
-                        if (currentSerie.colorField && currentSerie.colorField !== '')
-                            return d.data[currentSerie.colorField];
-                        else if (currentSerie.bulletColor && currentSerie.bulletColor !== '')
-                            return d.data[currentSerie.bulletColor];
-                        else
-                            return currentSerie.color;
-                    })
-                    .attr('transform', function (d) { return getBulletTransform(d, true); })
-                    .on('click', function (d) {
-                        if (diagram.sliceClick)
-                            diagram.sliceClick(d.data);
-                    })
-                    .on('mousemove', function (d, i) {
-                        //set slice hover
-                        d3.select(this).attr('fill-opacity', currentSerie.sliceHoverAlpha);
-
-                        //show tooltip
-                        diagram.showTooltip(diagram.getContent(d, currentSerie, diagram.tooltip.format));
-                    })
-                    .on('mouseout', function (d, i) {
-                        //hide tooltip
-                        diagram.hideTooltip();
-                    });
-            } else {
-                //create scatter bullets
-                diagramG.selectAll('.eve-abacus-bullet-' + serieIndex)
-                    .data(currentDataSet[serieIndex])
-                    .enter().append('svg:image')
-                    .attr('class', 'eve-abacus-bullets eve-abacus-bullet-' + serieIndex)
-                    .attr('xlink:href', currentSerie.bullet.replace('image:', ''))
-                    .attr('fill-opacity', function (d) {
-                        if (!d[currentSerie.yField])
-                            return 0;
-                        return 1;
-                    })
-                    .attr('width', currentSerie.bulletSize)
-                    .attr('height', currentSerie.bulletSize)
-                    .attr('transform', function (d) {
-                        return getBulletTransform(d, true);
-                    })
-                    .on('mousemove', function (d, i) {
-                        //show tooltip
-                        diagram.showTooltip(diagram.getContent(d, currentSerie, diagram.tooltip.format));
-                    })
-                    .on('mouseout', function (d, i) {
-                        //hide tooltip
-                        diagram.hideTooltip();
-                    });
-            }
-        });
-
         //animate abacus diagram
         animateAbacus();
 
@@ -335,7 +406,7 @@
                 diagramG.selectAll('.eve-abacus-lines').remove();
 
                 //update bullet data
-                diagramG.selectAll('.eve-abacus-bullet-' + serieIndex).data(currentDataSet[serieIndex]).exit().remove();
+                diagramG.selectAll('.eve-abacus-bullets').remove();
             });
 
             //animate abacus diagram

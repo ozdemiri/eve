@@ -14,13 +14,90 @@
 (function (e) {
     //define multiples diagram class
     function multiplesDiagram(options) {
+        //create pre initializaiton environment
+        var serieXValues = [],
+            currentXValuesLength = 0,
+            hasGroup = false,
+            groupValues = [],
+            currentSerie = options.series[0],
+            measureField = currentSerie.yField || currentSerie.measureField,
+            xField = currentSerie.xField || currentSerie.labelField;
+
+        //check serie chart type
+        switch (currentSerie.type) {
+            case 'area':
+            case 'bar':
+            case 'bubble':
+            case 'column':
+            case 'radar':
+                {
+                    //disable legend
+                    if (options.legend)
+                        options.legend.enabled = false;
+                    else
+                        options.legend = { enabled: false };
+                }
+                break;
+            case 'line':
+            case 'scatter':
+                {
+                    //check whether the current serie is not grouped
+                    if (!currentSerie.grouped) {
+                        //disable legend
+                        if (options.legend)
+                            options.legend.enabled = false;
+                        else
+                            options.legend = { enabled: false };
+                    }
+                }
+                break;
+        }
+
+        //calculate data area count
+        if (options.data) {
+            //check whether the current serie is line
+            if ((currentSerie.type === 'line' || currentSerie.type === 'scatter') && currentSerie.grouped) {
+                //iterate all data to calculate the max measure
+                options.data.forEach(function (currentSet) {
+                    if (currentSet.values && currentSet.values.length > 0) {
+                        currentSet.values.forEach(function (currentData) {
+                            for (var key in currentData) {
+                                if (key !== xField && key !== '_serieIndex' && key !== measureField && key !== 'total') {
+                                    if (serieXValues.indexOf(key) === -1)
+                                        serieXValues.push(key);
+                                }
+                            }
+                        });
+                    }
+                });
+
+                //set manual legend values
+                options.manualLegendValues = serieXValues;
+            } else {
+                //iterate data sets
+                options.data.forEach(function (d) {
+                    serieXValues.push(e.getUniqueValues(d.values, xField));
+                });
+
+                //iterate all serie x values
+                serieXValues.forEach(function (d, i) {
+                    //check whether the length > current
+                    if (d.length > currentXValuesLength) {
+                        options.manualLegendValues = d;
+                    }
+
+                    //set current x lengths
+                    currentXValuesLength = d.length;
+                });
+            }
+        }
+
         //declare needed variables
         var diagram = eve.base.init(options),
-            currentSerie = diagram.series[0],
             areaCount = 0,
             rectCount = 0,
-            width = diagram.plot.width,
-            height = diagram.plot.height,
+            width = diagram.plot.width - diagram.plot.left - diagram.plot.right,
+            height = diagram.plot.height - diagram.plot.top - diagram.plot.bottom,
             maxPrimeFactor = 0,
             singleRectWidth = 0,
             singleRectHeight = 0,
@@ -30,18 +107,28 @@
             maxX = 0,
             currentMeasureValue = 0,
             tempForeign = null,
-            measureField = currentSerie.yField || currentSerie.measureField,
             sectionX = 0,
             sectionY = 0,
             sectionRowIndex = 0,
             sectionID = '',
-            multipleType = getMultiplesType(),
-            xField = currentSerie.xField || currentSerie.labelField;
-            
+            actualData = [],
+            multipleType = getMultiplesType();
+
+        
         //makes necessary calculations to create the diagram
         function calculateEnvironment() {
-            //calculate data area count
+            //update current serie
+            currentSerie = diagram.series[0];
+
+            //iterate data set to create actual data
+            actualData = [];
             diagram.data.forEach(function (d) {
+                if (d.values.length && d.values.length > 0)
+                    actualData.push(e.clone(d));
+            });
+
+            //calculate data area count
+            actualData.forEach(function (d) {
                 if (d.values.length && d.values.length > 0)
                     areaCount++;
             });
@@ -81,12 +168,12 @@
             maxX = d3.max(diagram.data, function (d) { return d3.max(d.values, function (v) { return parseFloat(v[xField]); }); });
 
             //check whether the group field is not empty
-            if (currentSerie.groupField !== '') {
+            if (currentSerie.grouped) {
                 //minify max measure
                 maxMeasure = Number.MIN_VALUE;
 
                 //iterate all data to calculate the max measure
-                diagram.data.forEach(function (currentSet) {
+                actualData.forEach(function (currentSet) {
                     if (currentSet.values && currentSet.values.length > 0) {
                         currentSet.values.forEach(function (currentData) {
                             for (var key in currentData) {
@@ -104,7 +191,7 @@
                 minMeasure = maxMeasure;
 
                 //iterate all data to calculate the max measure
-                diagram.data.forEach(function (currentSet) {
+                actualData.forEach(function (currentSet) {
                     if (currentSet.values && currentSet.values.length > 0) {
                         currentSet.values.forEach(function (currentData) {
                             for (var key in currentData) {
@@ -162,7 +249,38 @@
         function createChart(id, dataSet, index) {
             //declare needed variables
             var chartCreator = currentSerie.type + 'Chart',
-                chartTitle = dataSet[currentSerie.multipleField];
+                chartTitle = dataSet[currentSerie.multipleField],
+                chartSeries = [],
+                dataColors = {},
+                currentChartSerie = null;
+
+            //create data colors
+            if (diagram.manualLegendValues) {
+                diagram.manualLegendValues.forEach(function (m, i) {
+                    dataColors[m.toString()] = i >= e.colors.length ? e.randColor() : e.colors[i];
+                });
+            }
+
+            //check whether the current serie is grouped
+            if (currentSerie.grouped) {
+                //iterate all x values
+                serieXValues.forEach(function (s) {
+                    //set current chart serie
+                    currentChartSerie = e.clone(currentSerie);
+                    currentChartSerie.yField = s;
+                    currentChartSerie.dataColors = dataColors;
+
+                    //set current serie as chart serie
+                    chartSeries.push(currentChartSerie);
+                });
+            } else {
+                //set serie color
+                currentSerie.color = index >= e.colors.length ? e.randColor() : e.colors[index];
+                currentSerie.dataColors = dataColors;
+
+                //set current serie as chart serie
+                chartSeries.push(currentSerie);
+            }
 
             //declare chart options
             var chartOptions = {
@@ -178,9 +296,23 @@
                 animation: diagram.animation,
                 zoomable: diagram.zoomable,
                 xField: xField,
-                series: [currentSerie],
+                series: chartSeries,
                 width: singleRectWidth,
-                height: singleRectHeight
+                height: singleRectHeight,
+                xAxis: {
+                    enabled: diagram.xAxis.enabled,
+                    startsFromZero: diagram.xAxis.startsFromZero,
+                    locked: diagram.xAxis.locked,
+                    min: diagram.xAxis.locked ? minX : null,
+                    max: diagram.xAxis.locked ? maxX : null,
+                },
+                yAxis: {
+                    enabled: diagram.yAxis.enabled,
+                    startsFromZero: diagram.yAxis.startsFromZero,
+                    locked: diagram.yAxis.locked,
+                    min: diagram.yAxis.locked ? minMeasure : null,
+                    max: diagram.yAxis.locked ? maxMeasure : null,
+                }
             };
 
             //create chart
@@ -190,10 +322,11 @@
         //creates a div for each multiple
         function createSections() {
             //clear svg content
-            diagram.svg.selectAll('*').remove();
-            
+            diagram.svg.selectAll('.foreigns').remove();
+            sectionRowIndex = 0;
+
             //iterate all data
-            diagram.data.forEach(function (currentSet, index) {
+            actualData.forEach(function (currentSet, index) {
                 if (currentSet.values && currentSet.values.length > 0) {
                     //set section id
                     sectionID = diagram.container + '_' + index;
@@ -211,6 +344,7 @@
                     //create foreign object for current set
                     tempForeign = diagram.svg
                         .append('foreignObject')
+                        .attr('class', 'foreigns')
                         .attr('width', singleRectWidth)
                         .attr('height', singleRectHeight)
                         .attr('x', sectionX)
@@ -250,13 +384,53 @@
             //normalize iterative values
             areaCount = 0;
             sectionRowIndex = 0;
+            serieXValues = [];
 
             //update diagram data
             diagram.data = data;
 
+            //check whether the current serie is line
+            if ((currentSerie.type === 'line' || currentSerie.type === 'scatter') && currentSerie.grouped) {
+                //iterate all data to calculate the max measure
+                actualData.forEach(function (currentSet) {
+                    if (currentSet.values && currentSet.values.length > 0) {
+                        currentSet.values.forEach(function (currentData) {
+                            for (var key in currentData) {
+                                if (key !== xField && key !== '_serieIndex' && key !== measureField && key !== 'total') {
+                                    if (serieXValues.indexOf(key) === -1)
+                                        serieXValues.push(key);
+                                }
+                            }
+                        });
+                    }
+                });
+
+                //set manual legend values
+                diagram.manualLegendValues = serieXValues;
+            } else {
+                //iterate data sets
+                actualData.forEach(function (d) {
+                    serieXValues.push(e.getUniqueValues(d.values, xField));
+                });
+
+                //iterate all serie x values
+                serieXValues.forEach(function (d, i) {
+                    //check whether the length > current
+                    if (d.length > currentXValuesLength) {
+                        options.manualLegendValues = d;
+                    }
+
+                    //set current x lengths
+                    currentXValuesLength = d.length;
+                });
+            }
+
             //calculate area, min and max values
             calculateEnvironment();
-            createSections();
+            createSections(true);
+
+            //re-create legend
+            diagram.updateLegend();
         };
 
         //draws the diagram into a canvas
@@ -297,6 +471,7 @@
 
     //attach area chart method into the eve
     e.multiples = function (options) {
+        options.type = 'manual';
         return new multiplesDiagram(options);
     };
 })(eve);

@@ -101,6 +101,9 @@
             if (currentSerie.colorField !== '') {
                 d._sliceColor = d[currentSerie.colorField];
                 zeroDataSet[i]._sliceColor = d[currentSerie.colorField];
+            } else if (currentSerie.dataColors) {
+                d._sliceColor = currentSerie.dataColors[d[chart.xField].toString()];
+                zeroDataSet[i]._sliceColor = currentSerie.dataColors[d[chart.xField].toString()];
             }
 
             //iterate all keys in current data

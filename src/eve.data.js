@@ -33,8 +33,6 @@
         //declare needed variables
         var iterationStop = data.length > 5 ? 5 : data.length,
             currentData = null,
-            firstDataType = 'string',
-            lastDataType = 'string',
             currentDataType = 'string';
 
         //iterate to stop
@@ -47,33 +45,43 @@
                 //set current data type
                 currentDataType = e.getType(currentData[d]);
                 
-                //check index
-                if(i === 1)
-                    firstDataType = currentDataType;
-                else if(i === iterationStop - 1)
-                    lastDataType = currentDataType;
-
                 //push the current data type to the types stack
                 columns[d].type.push(currentDataType);
             });
         }
 
         //get column data types
-        return getColumnDataTypes(columns, firstDataType, lastDataType);
+        return getColumnDataTypes(columns);
     }
 
     //guesses data type by top 5 records' data types
     function getColumnDataTypes(columns, firstType, lastType) {
         //declare variables
-        var areIdentical = true;
+        var areIdentical = true,
+            currentType = 'string';
 
         //iterate all keys in columns
         d3.keys(columns).map(function(d) {
             //check whether the types are identical
             areIdentical = e.isIdentical(columns[d].type);
 
+            //check whether the types are identical
+            if (areIdentical) {
+                //set current type
+                currentType = columns[d].type[0];
+            } else {
+                //iterate types
+                for (var i = 0; i < columns[d].type.length; i++) {
+                    //check whether the current type is not null
+                    if (columns[d].type[i] && columns[d].type[i] !== 'null') {
+                        currentType = columns[d].type[i];
+                        break;
+                    }
+                }
+            }
+
             //update column type
-            columns[d].type = areIdentical ? lastType : firstType;
+            columns[d].type = currentType;//areIdentical ? lastType : firstType;
         });
 
         return columns;

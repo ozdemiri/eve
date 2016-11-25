@@ -23,7 +23,7 @@
             donutWidth = (chart.plot.width - chart.plot.left - chart.plot.right),
             donutHeight = (chart.plot.height - chart.plot.bottom - chart.plot.top),
             transX = (chart.width - chart.plot.left - chart.plot.right) / 2,
-            transY = donutHeight / 2,
+            transY = chart.plot.top + donutHeight / 2,
             outerRadius = Math.min(donutWidth, donutHeight) / 2,
             innerRadius = outerRadius / 2,
             arc = d3.arc().outerRadius(outerRadius).innerRadius(innerRadius),
@@ -57,6 +57,9 @@
             if (currentSerie.colorField !== '') {
                 d._sliceColor = d[currentSerie.colorField];
                 zeroDataSet[i]._sliceColor = d[currentSerie.colorField];
+            } else if (currentSerie.dataColors) {
+                d._sliceColor = currentSerie.dataColors[d[chart.xField].toString()];
+                zeroDataSet[i]._sliceColor = currentSerie.dataColors[d[chart.xField].toString()];
             }
 
             //iterate all keys in current data

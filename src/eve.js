@@ -161,6 +161,7 @@
         expression: 'none',
         fontFamily: 'Impact',
         groupField: '',
+        grouped: false,
         handleColor: '#999999',
         highField: '',
         isSparkline: false,
@@ -221,7 +222,9 @@
         rangeColor: '#cccccc',
         markerColor: '#000000',
         markerWidth: 5,
-        tileIcon: 'circle' //square, hexagonal, circle
+        tileIcon: 'circle', //square, hexagonal, circle
+        linkShapes: false,
+        hideEmptyShapes: false
     };
 
     //set map directory

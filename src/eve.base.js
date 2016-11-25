@@ -113,7 +113,7 @@
         that.serieNameStability = {};
         that.normalizedData = null;
         that.reversedAxis = options.reversedAxis ? options.reversedAxis : false;
-        
+
         //set aspect ratio
         that.aspectRatio = that.width / that.height;
 
@@ -336,7 +336,7 @@
                         }
 
                         //increase total value
-                        d.total += +d[name];
+                        d.total += Math.abs(+d[name]);
                     });
                 });
                 
@@ -351,10 +351,10 @@
                     default:
                         {
                             //push min value for x domain
-                            that.domains.x.push(that.xAxis.startsFromZero ? 0 : d3.min(that.data, function (d) { return d[that.xField]; }));
+                            that.domains.x.push(that.xAxis.startsFromZero ? 0 : that.xAxis.locked ? that.xAxis.min : (d3.min(that.data, function (d) { return d[that.xField]; })));
 
                             //push max value for x domain
-                            that.domains.x.push(d3.max(that.data, function (d) { return d[that.xField]; }));
+                            that.domains.x.push(that.xAxis.locked ? that.xAxis.max : d3.max(that.data, function (d) { return d[that.xField]; }));
                         }
                         break;
                 }
@@ -365,36 +365,54 @@
                     that.domains.y = e.getUniqueValues(that.data, that.series[0].yField);
                 } else {
                     //get minimum value y axis domain
-                    var serieValues = [];
-                    var minYValue = d3.min(that.data, function (currentData) {
-                        serieValues = [];
-                        that.serieNames.forEach(function (name) {
-                            serieValues.push(+currentData[name]);
-                        });
-                        var currentMin = d3.min(serieValues);
-
-                        if (that.yAxis.stacked)
-                            return currentMin < 0 ? d3.sum(serieValues) : currentMin;
-                        else
-                            return currentMin;
-                    });
+                    var serieValues = [],
+                        minYValue, maxYValue;
                     
-                    //get maximum value y axis domain
-                    var maxYValue = d3.max(that.data, function (currentData) {
-                        //check whether the chart y axis is stacked
-                        if (that.yAxis.stacked) {
-                            return currentData.total;
+                    //check whether the y axis starts from zero
+                    if (that.yAxis.startsFromZero) {
+                        minYValue = 0;
+                    } else {
+                        //check whether the y axis has min value
+                        if (!isNaN(that.yAxis.min) && that.yAxis.min !== null) {
+                            minYValue = that.yAxis.min;
                         } else {
-                            serieValues = [];
-                            that.serieNames.forEach(function (name) {
-                                serieValues.push(+currentData[name]);
+                            //get minimum value y axis domain
+                            minYValue = d3.min(that.data, function (currentData) {
+                                serieValues = [];
+                                that.serieNames.forEach(function (name) {
+                                    serieValues.push(+currentData[name]);
+                                });
+                                var currentMin = d3.min(serieValues);
+
+                                if (that.yAxis.stacked)
+                                    return currentMin < 0 ? d3.sum(serieValues) : currentMin;
+                                else
+                                    return currentMin;
                             });
-                            return d3.max(serieValues);
                         }
-                    });
+                    }
+                    
+                    //check whether the y axis has max value
+                    if (!isNaN(that.yAxis.max) && that.yAxis.max !== null) {
+                        maxYValue = that.yAxis.max;
+                    } else {
+                        //get maximum value y axis domain
+                        maxYValue = d3.max(that.data, function (currentData) {
+                            //check whether the chart y axis is stacked
+                            if (that.yAxis.stacked) {
+                                return currentData.total;
+                            } else {
+                                serieValues = [];
+                                that.serieNames.forEach(function (name) {
+                                    serieValues.push(+currentData[name]);
+                                });
+                                return d3.max(serieValues);
+                            }
+                        });
+                    }
                     
                     //push min value for y domain
-                    that.domains.y.push(that.yAxis.startsFromZero ? 0 : minYValue);
+                    that.domains.y.push(minYValue);
 
                     //push max value for y domain
                     that.domains.y.push(that.frozenMaxY ? maxYValue : maxYValue * 1.1);
@@ -759,24 +777,34 @@
                 colorValue = data[currentSerie.colorField],
                 dateValue = data[currentSerie.dateField],
                 endValue = data[currentSerie.endField],
-                groupValue = data[currentSerie.groupField],
+                groupValue = data[currentSerie.groupField] || data.group,
                 highValue = data[currentSerie.highField],
                 labelValue = data[currentSerie.labelField],
                 latValue = data[currentSerie.latField],
                 longValue = data[currentSerie.longField],
                 lowValue = data[currentSerie.lowField],
                 markerValue = data[currentSerie.markerField],
-                measureValue = data.measure || data[currentSerie.measureField],
+                measureValue = data.measure || data[currentSerie.measureField] || data[currentSerie.yField] || data.size,
                 openValue = data[currentSerie.openField],
                 rangeValue = data[currentSerie.rangeField],
                 rowValue = data[currentSerie.rowField],
                 sizeValue = data.sizeValue || data[currentSerie.sizeField],
-                sourceValue = data[currentSerie.sourceField],
+                sourceValue = data[that.xField] || data[currentSerie.sourceField] || data.source || data.name,
                 startValue = data[currentSerie.startField],
                 standardValue = data.value || data[currentSerie.valueField],
-                xValue = data.xValue || data[currentSerie.xField],
+                xValue = data.xValue || data[that.xField],
                 yValue = data.yValue || data[currentSerie.yField];
-                
+
+            //check whehter the data has children and name
+            if (data.children && data.name) {
+                //set measure as sum of 
+                measureValue = 0;
+                data.children.forEach(function (d) {
+                    if (d.size)
+                        measureValue = +d.size;
+                });
+            }
+            
             //iterate tags
             tags.forEach(function (tag) {
                 //split tag format
@@ -785,7 +813,6 @@
                     currentValue = '';
 
                 //replace tag with the value
-
                 switch (tagCleared) {
                     case 'value':
                         {
@@ -921,6 +948,7 @@
                         }
                         break;
                     case 'x':
+                    case 'title':
                         {
                             //set current value
                             currentValue = xValue;

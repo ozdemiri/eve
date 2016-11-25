@@ -14,6 +14,9 @@
 (function(e) {
     //define bar chart class
     function barChart(options) {
+        //froze x axis
+        options.frozenXAxis = 'string';
+
         //declare needed variables
         var that = this,
             chart = eve.base.init(options),
@@ -38,10 +41,10 @@
 
         //animates bars
         function animateColumns(isStacked) {
+            //calculate diff min base
+            diffMinBase = Math.abs(axis.xScale(0) - axis.xScale(chart.domains.y[0]));
+
             if(isStacked) {
-                //calculate diff min base
-                diffMinBase = Math.abs(axis.xScale(0) - axis.xScale(chart.domains.y[0]));
-                
                 //animate bar chart
                 columnRects
                     .transition(chart.animation.duration)
@@ -49,10 +52,18 @@
                     .delay(function(d, i) { return i * chart.animation.delay; })
                     .attr('x', function (d) {
                         if (chart.domains.y[0] < 0) {
-                            if (d[1] > 0)
-                                return axis.xScale(d[0]);
-                            else
-                                return axis.xScale(d[1]);
+                            //check whether the serie length = 1
+                            if (chart.series.length === 1) {
+                                if (d[1] > 0)
+                                    return axis.xScale(d[0]);
+                                else
+                                    return axis.xScale(d[1]);
+                            } else {
+                                if (d[1] > 0)
+                                    return axis.xScale(d[0]);
+                                else
+                                    return Math.abs(axis.xScale(d[1]) - axis.xScale(d[0]));
+                            }
                         } else {
                             return d[1] < 0 ? axis.xScale(d[0]) : axis.xScale(d[0]) + diffMinBase;
                         }
@@ -61,9 +72,12 @@
                         return axis.yScale(d.data[xField]); 
                     })
                     .attr('width', function (d) {
-                        if (chart.series.length === 1)
-                            return Math.abs(axis.xScale(d[0]) - axis.xScale(d[1])) - diffMinBase;
-                        return Math.abs(axis.xScale(d[0]) - axis.xScale(d[1]));
+                        //check serie count
+                        if (chart.series.length === 1) {
+                            return Math.abs(axis.xScale(d[1]) - (chart.domains.y[0] < 0 ? diffMinBase : 0));
+                        } else {
+                            return Math.abs(axis.xScale(d[0]) - axis.xScale(d[1]));
+                        }
                     })
                     .attr('height', axis.yScale.bandwidth());
             } else {
@@ -72,15 +86,26 @@
                     .transition(chart.animation.duration)
                     .ease(chart.animation.easing.toEasing())
                     .delay(function(d, i) { return i * chart.animation.delay; })
-                    .attr('width', function(d, i) {
-                        return axis.xScale(d.data[d.name]); 
+                    .attr('width', function (d, i) {
+                        if (chart.series.length === 1) {
+                            return Math.abs(axis.xScale(d.data[d.name]) - diffMinBase);
+                        } else {
+                            return axis.xScale(d.data[d.name]);
+                        }
                     })
                     .attr('height', singleGroupWidth)
                     .attr('x', function (d) {
-                        if (chart.domains.y[0] < 0)
-                            return d.data[d.name] < 0 ? axis.xScale(0) - axis.xScale(d.data[d.name]) : axis.xScale(0);
-                        else
-                            return axis.xScale(chart.domains.y[0]);
+                        if (chart.series.length === 1) {
+                            if (d.data[d.name] > 0)
+                                return axis.xScale(0);
+                            else
+                                return axis.xScale(d.data[d.name]);
+                        } else {
+                            if (chart.domains.y[0] < 0)
+                                return d.data[d.name] < 0 ? axis.xScale(0) - axis.xScale(d.data[d.name]) : axis.xScale(0);
+                            else
+                                return axis.xScale(chart.domains.y[0]);
+                        }
                     })
                     .attr('y', function (d) {
                         return groupAxis(d.name);
@@ -107,7 +132,7 @@
                     d.serieIndex = s.index;
                 });
             });
-            
+
             //set bar rectangles
             columnSeries = chartG.selectAll('.eve-bar-serie')
                 .data(stackedData)
