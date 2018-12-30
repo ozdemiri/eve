@@ -21,6 +21,63 @@ eve.pieChart({
   ]
 });
 ```
+### Supported Visualizations
+#### Charts
+- Area Chart
+- Bar Chart
+- Bubble Chart
+- Column Chart
+- Combination Chart
+- Donut Chart
+- Funnel Chart
+- Line Chart
+- Pie Chart
+- Pyramid Chart
+- Radar Chart
+- Scatter Chart
+#### Diagrams
+- Abacus
+- Bubble Force
+- Bullet
+- Bump
+- Calendarmap
+- Circle Clusters
+- Chord
+- Circle Packing
+- Co-Occurence Matrix
+- Dendrogram
+- Force Directed
+- Gantt
+- Heatmap
+- Matrix
+- Mirrored Bars
+- Network
+- Parallel Lines
+- Sankey
+- Seatmap
+- Slope
+- Streamgraph
+- Sunburst
+- Timeline
+- Treemap
+- Wordcloud
+#### Maps
+- Cartogram
+- Continous Cartogram
+- Density
+- Location
+- Route
+- Standard
+- Tile (US Only)
+#### Gauges
+- Dial
+- Digital
+- Linear
+- Standard
+#### Tabular
+- Grid (Has conditional formatting)
+- Pivot (Has conditional formatting)
+
 ### Contributors
 - Ismail Ozdemir
 - Utkucan Ari
