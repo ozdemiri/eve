@@ -1,4 +1,4 @@
-Eve is a simple visualization library including **charts**, **diagrams** and **maps".
+Eve is a simple visualization library including **charts**, **diagrams** and **maps**.
 
 ### Basic Usage for a Pie Chart
 
