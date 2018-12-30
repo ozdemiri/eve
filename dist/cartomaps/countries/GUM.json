@@ -1,0 +1,1 @@
+{"type":"Topology","transform":{"scale":[0.001704824499176831,0.0019837190176204547],"translate":[144.65358516621686,13.285610677495994]},"arcs":[[[91,81],[-29,-81],[-62,1],[1,76],[75,39],[33,59],[66,-17],[-84,-77]]],"objects":{"GUM.geo":{"type":"GeometryCollection","geometries":[{"arcs":[[0]],"type":"Polygon","properties":{"name":"Guam","postal":null},"id":"GUM"}]}}}

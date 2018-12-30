@@ -1,0 +1,1 @@
+{"type":"Topology","transform":{"scale":[0.0007675344405467261,0.0011638967223642127],"translate":[-61.75642728631496,12.002834377504485]},"arcs":[[[163,35],[-83,-35],[-45,11],[-35,62],[35,68],[76,59],[89,-45],[-37,-120]]],"objects":{"GRD.geo":{"type":"GeometryCollection","geometries":[{"arcs":[[0]],"type":"Polygon","properties":{"name":"Grenada","postal":null},"id":"GRD"}]}}}

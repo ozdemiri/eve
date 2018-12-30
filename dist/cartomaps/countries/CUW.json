@@ -1,0 +1,1 @@
+{"type":"Topology","transform":{"scale":[0.0026297445813706116,0.0019899162760744814],"translate":[-69.16431105595365,12.042903179637735]},"arcs":[[[150,0],[-90,53],[-60,80],[35,17],[12,-43],[78,-43],[25,-64]]],"objects":{"CUW.geo":{"type":"GeometryCollection","geometries":[{"arcs":[[0]],"type":"Polygon","properties":{"name":"Curaçao","postal":null},"id":"CUW"}]}}}

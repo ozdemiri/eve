@@ -1,0 +1,1 @@
+{"type":"Topology","transform":{"scale":[0.0007812695388440715,0.000867972210749078],"translate":[167.92644026763466,-29.06633582088885]},"arcs":[[[24,75],[51,-67],[-75,-8],[24,75]]],"objects":{"NFK.geo":{"type":"GeometryCollection","geometries":[{"arcs":[[0]],"type":"Polygon","properties":{"name":"Norfolk Island","postal":null},"id":"NFK"}]}}}

@@ -1,0 +1,1 @@
+{"type":"Topology","transform":{"scale":[0.0012659164711220682,0.0013721010800552237],"translate":[-169.95042884011886,-19.102308485611776]},"arcs":[[[100,0],[-100,11],[43,89],[56,-2],[1,-98]]],"objects":{"NIU.geo":{"type":"GeometryCollection","geometries":[{"arcs":[[0]],"type":"Polygon","properties":{"name":"Niue","postal":null},"id":"NIU"}]}}}

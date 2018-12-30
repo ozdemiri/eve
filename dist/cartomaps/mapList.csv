@@ -1,0 +1,274 @@
+category1,category2,category3,category4,category5,category6,mapName
+World,World,,,,,worldwoantarctica
+World,World With Antarctica,,,,,world
+Africa,Africa,,,,,africa
+Africa,Eastern Africa,Eastern Africa,,,,easternafrica
+Africa,Eastern Africa,Countries,Burundi ,,,BDI
+Africa,Eastern Africa,Countries,Djibouti ,,,DJI
+Africa,Eastern Africa,Countries,Eritrea ,,,ERI
+Africa,Eastern Africa,Countries,Ethiopia ,,,ETH
+Africa,Eastern Africa,Countries,Kenya ,,,KEN
+Africa,Eastern Africa,Countries,Madagascar ,,,MDG
+Africa,Eastern Africa,Countries,Malawi ,,,MWI
+Africa,Eastern Africa,Countries,Mozambique ,,,MOZ
+Africa,Eastern Africa,Countries,Rwanda ,,,RWA
+Africa,Eastern Africa,Countries,Somalia ,,,SOM
+Africa,Eastern Africa,Countries,Uganda ,,,UGA
+Africa,Eastern Africa,Countries,"Tanzania, United Republic of ",,,TZA
+Africa,Eastern Africa,Countries,Zambia ,,,ZMB
+Africa,Eastern Africa,Countries,Zimbabwe ,,,ZWE
+Africa,Central Africa,Central Africa,,,,centralafrica
+Africa,Central Africa,Countries,Angola ,,,AGO
+Africa,Central Africa,Countries,Cameroon ,,,CMR
+Africa,Central Africa,Countries,Central African Republic ,,,CAF
+Africa,Central Africa,Countries,Chad ,,,TCD
+Africa,Central Africa,Countries,Congo ,,,COG
+Africa,Central Africa,Countries,Congo (Democratic Republic of the) ,,,COD
+Africa,Central Africa,Countries,Equatorial Guinea ,,,GNQ
+Africa,Central Africa,Countries,Gabon ,,,GAB
+Africa,Northern Africa,Northern Africa,,,,northernafrica
+Africa,Northern Africa,Countries,Algeria,,,DZA
+Africa,Northern Africa,Countries,Egypt ,,,EGY
+Africa,Northern Africa,Countries,Libya ,,,LBY
+Africa,Northern Africa,Countries,Morocco ,,,MAR
+Africa,Northern Africa,Countries,Sudan ,,,SDN
+Africa,Northern Africa,Countries,Tunisia ,,,TUN
+Africa,Southern Africa,Southern Africa,,,,southernafrica
+Africa,Southern Africa,Countries,Botswana ,,,BWA
+Africa,Southern Africa,Countries,Lesotho ,,,LSO
+Africa,Southern Africa,Countries,Namibia ,,,NAM
+Africa,Southern Africa,Countries,South Africa ,,,ZAF
+Africa,Southern Africa,Countries,Swaziland ,,,SWZ
+Africa,Western Africa,Western Africa,,,,westernafrica
+Africa,Western Africa,Countries,Benin ,,,BEN
+Africa,Western Africa,Countries,Burkina Faso ,,,BFA
+Africa,Western Africa,Countries,Cote d'Ivoire ,,,CIV
+Africa,Western Africa,Countries,Gambia ,,,GMB
+Africa,Western Africa,Countries,Ghana ,,,GHA
+Africa,Western Africa,Countries,Guinea ,,,GIN
+Africa,Western Africa,Countries,Guinea-Bissau ,,,GNB
+Africa,Western Africa,Countries,Liberia ,,,LBR
+Africa,Western Africa,Countries,Mali ,,,MLI
+Africa,Western Africa,Countries,Mauritania ,,,MRT
+Africa,Western Africa,Countries,Niger ,,,NER
+Africa,Western Africa,Countries,Nigeria ,,,NGA
+Africa,Western Africa,Countries,Senegal ,,,SEN
+Africa,Western Africa,Countries,Sierra Leone ,,,SLE
+Africa,Western Africa,Countries,Togo ,,,TGO
+Americas,Americas,,,,,americas
+Americas,Latin America and the Caribbean,Caribbean,Caribbean,,,caribbean
+Americas,Latin America and the Caribbean,Caribbean,Countries,Antigua and Barbuda ,,ATG
+Americas,Latin America and the Caribbean,Caribbean,Countries,Bahamas ,,BHS
+Americas,Latin America and the Caribbean,Caribbean,Countries,Barbados ,,BRB
+Americas,Latin America and the Caribbean,Caribbean,Countries,Cuba ,,CUB
+Americas,Latin America and the Caribbean,Caribbean,Countries,Curacao ,,CUW
+Americas,Latin America and the Caribbean,Caribbean,Countries,Dominica ,,DMA
+Americas,Latin America and the Caribbean,Caribbean,Countries,Dominican Republic ,,DOM
+Americas,Latin America and the Caribbean,Caribbean,Countries,Grenada ,,GRD
+Americas,Latin America and the Caribbean,Caribbean,Countries,Haiti ,,HTI
+Americas,Latin America and the Caribbean,Caribbean,Countries,Jamaica ,,JAM
+Americas,Latin America and the Caribbean,Caribbean,Countries,Montserrat ,,MSR
+Americas,Latin America and the Caribbean,Caribbean,Countries,Puerto Rico ,,PRI
+Americas,Latin America and the Caribbean,Caribbean,Countries,Saint Kitts and Nevis ,,KNA
+Americas,Latin America and the Caribbean,Caribbean,Countries,Trinidad and Tobago ,,TTO
+Americas,Latin America and the Caribbean,Central America,Central America,,,centralamerica
+Americas,Latin America and the Caribbean,Central America,Countries,Belize ,,BLZ
+Americas,Latin America and the Caribbean,Central America,Countries,Costa Rica ,,CRI
+Americas,Latin America and the Caribbean,Central America,Countries,El Salvador ,,SLV
+Americas,Latin America and the Caribbean,Central America,Countries,Guatemala ,,GTM
+Americas,Latin America and the Caribbean,Central America,Countries,Honduras ,,HND
+Americas,Latin America and the Caribbean,Central America,Countries,Nicaragua ,,NIC
+Americas,Latin America and the Caribbean,Central America,Countries,Panama ,,PAN
+Americas,Latin America and the Caribbean,Central America,Countries,Mexico ,,MEX
+Americas,Latin America and the Caribbean,South America,South America,,,southamerica
+Americas,Latin America and the Caribbean,South America,Countries,Argentina ,,ARG
+Americas,Latin America and the Caribbean,South America,Countries,Bolivia,,BOL
+Americas,Latin America and the Caribbean,South America,Countries,Brazil ,,BRA
+Americas,Latin America and the Caribbean,South America,Countries,Chile ,,CHL
+Americas,Latin America and the Caribbean,South America,Countries,Colombia ,,COL
+Americas,Latin America and the Caribbean,South America,Countries,Ecuador ,,ECU
+Americas,Latin America and the Caribbean,South America,Countries,Falkland Islands (Malvinas) ,,FLK
+Americas,Latin America and the Caribbean,South America,Countries,Guyana ,,GUY
+Americas,Latin America and the Caribbean,South America,Countries,Paraguay ,,PRY
+Americas,Latin America and the Caribbean,South America,Countries,Peru ,,PER
+Americas,Latin America and the Caribbean,South America,Countries,Suriname ,,SUR
+Americas,Latin America and the Caribbean,South America,Countries,Uruguay ,,URY
+Americas,Latin America and the Caribbean,South America,Countries,Venezuela,,VEN
+Americas,Northern America,Northern America,,,,northernamerica
+Americas,Northern America,Countries,Canada,,,CAN
+Americas,Northern America,Countries,Greenland,,,GRL
+Americas,Northern America,Countries,Saint Pierre and Miquelon,,,SPM
+Americas,Northern America,Countries,USA,USA States,,USA
+Americas,Northern America,Countries,USA,USA Counties,,SC_USACounties
+Americas,Northern America,Countries,USA,Alaska,,SC_AK
+Americas,Northern America,Countries,USA,Alabama,,SC_AL
+Americas,Northern America,Countries,USA,Arkansas,,SC_AR
+Americas,Northern America,Countries,USA,Arizona,,SC_AZ
+Americas,Northern America,Countries,USA,California,,SC_CA
+Americas,Northern America,Countries,USA,Colorado,,SC_CO
+Americas,Northern America,Countries,USA,Connecticut,,SC_CT
+Americas,Northern America,Countries,USA,District of Columbia,,SC_DC
+Americas,Northern America,Countries,USA,Delaware,,SC_DE
+Americas,Northern America,Countries,USA,Florida,,SC_FL
+Americas,Northern America,Countries,USA,Georgia,,SC_GA
+Americas,Northern America,Countries,USA,Hawaii,,SC_HI
+Americas,Northern America,Countries,USA,Iowa,,SC_IA
+Americas,Northern America,Countries,USA,Idaho,,SC_ID
+Americas,Northern America,Countries,USA,Illinois,,SC_IL
+Americas,Northern America,Countries,USA,Indiana,,SC_IN
+Americas,Northern America,Countries,USA,Kansas,,SC_KS
+Americas,Northern America,Countries,USA,Kentucky,,SC_KY
+Americas,Northern America,Countries,USA,Louisiana,,SC_LA
+Americas,Northern America,Countries,USA,Massachusetts,,SC_MA
+Americas,Northern America,Countries,USA,Maryland,,SC_MD
+Americas,Northern America,Countries,USA,Maine,,SC_ME
+Americas,Northern America,Countries,USA,Michigan,,SC_MI
+Americas,Northern America,Countries,USA,Minnesota,,SC_MN
+Americas,Northern America,Countries,USA,Missouri,,SC_MO
+Americas,Northern America,Countries,USA,Mississippi,,SC_MS
+Americas,Northern America,Countries,USA,Montana,,SC_MT
+Americas,Northern America,Countries,USA,North Carolina,,SC_NC
+Americas,Northern America,Countries,USA,North Dakota,,SC_ND
+Americas,Northern America,Countries,USA,Nebraska,,SC_NE
+Americas,Northern America,Countries,USA,New Hampshire,,SC_NH
+Americas,Northern America,Countries,USA,New Jersey,,SC_NJ
+Americas,Northern America,Countries,USA,New Mexico,,SC_NM
+Americas,Northern America,Countries,USA,Nevada,,SC_NV
+Americas,Northern America,Countries,USA,New York,,SC_NY
+Americas,Northern America,Countries,USA,Ohio,,SC_OH
+Americas,Northern America,Countries,USA,Oklahoma,,SC_OK
+Americas,Northern America,Countries,USA,Oregon,,SC_OR
+Americas,Northern America,Countries,USA,Pennsylvania,,SC_PA
+Americas,Northern America,Countries,USA,Rhode Island,,SC_RI
+Americas,Northern America,Countries,USA,South Carolina,,SC_SC
+Americas,Northern America,Countries,USA,South Dakota,,SC_SD
+Americas,Northern America,Countries,USA,Tennessee,,SC_TN
+Americas,Northern America,Countries,USA,Texas,,SC_TX
+Americas,Northern America,Countries,USA,Utah,,SC_UT
+Americas,Northern America,Countries,USA,Virginia,,SC_VA
+Americas,Northern America,Countries,USA,Vermont,,SC_VT
+Americas,Northern America,Countries,USA,Washington,,SC_WA
+Americas,Northern America,Countries,USA,Wisconsin,,SC_WI
+Americas,Northern America,Countries,USA,West Virginia,,SC_WV
+Americas,Northern America,Countries,USA,Wyoming,,SC_WY
+Asia,Asia,,,,,asia
+Asia,Central Asia,Central Asia,,,,centralasia
+Asia,Central Asia,Countries,Kazakhstan ,,,KAZ
+Asia,Central Asia,Countries,Kyrgyzstan ,,,KGZ
+Asia,Central Asia,Countries,Tajikistan ,,,TJK
+Asia,Central Asia,Countries,Turkmenistan ,,,TKM
+Asia,Central Asia,Countries,Uzbekistan ,,,UZB
+Asia,Eastern Asia,Eastern Asia,,,,easternasia
+Asia,Eastern Asia,Countries,China ,,,CHN
+Asia,Eastern Asia,Countries,Hong Kong ,,,HKG
+Asia,Eastern Asia,Countries,Taiwan,,,TWN
+Asia,Eastern Asia,Countries,Japan ,,,JPN
+Asia,Eastern Asia,Countries,Macao ,,,MAC
+Asia,Eastern Asia,Countries,Mongolia ,,,MNG
+Asia,Eastern Asia,Countries,Korea (Democratic People's Republic of) ,,,PRK
+Asia,Eastern Asia,Countries,Korea (Republic of) ,,,KOR
+Asia,Southern Asia,Southern Asia,,,,southernasia
+Asia,Southern Asia,Countries,Afghanistan ,,,AFG
+Asia,Southern Asia,Countries,Bangladesh ,,,BGD
+Asia,Southern Asia,Countries,Bhutan ,,,BTN
+Asia,Southern Asia,Countries,India ,,,IND
+Asia,Southern Asia,Countries,Iran (Islamic Republic of) ,,,IRN
+Asia,Southern Asia,Countries,Nepal ,,,NPL
+Asia,Southern Asia,Countries,Pakistan ,,,PAK
+Asia,Southern Asia,Countries,Sri Lanka ,,,LKA
+Asia,South-Eastern Asia,South-Eastern Asia,,,,southeasternasia
+Asia,South-Eastern Asia,Countries,Brunei Darussalam ,,,BRN
+Asia,South-Eastern Asia,Countries,Cambodia ,,,KHM
+Asia,South-Eastern Asia,Countries,Indonesia ,,,IDN
+Asia,South-Eastern Asia,Countries,Lao People's Democratic Republic ,,,LAO
+Asia,South-Eastern Asia,Countries,Malaysia ,,,MYS
+Asia,South-Eastern Asia,Countries,Myanmar ,,,MMR
+Asia,South-Eastern Asia,Countries,Philippines ,,,PHL
+Asia,South-Eastern Asia,Countries,Singapore ,,,SGP
+Asia,South-Eastern Asia,Countries,Thailand ,,,THA
+Asia,South-Eastern Asia,Countries,Timor-Leste ,,,TLS
+Asia,South-Eastern Asia,Countries,Vietnam ,,,VNM
+Asia,Western Asia,Western Asia,,,,westernasia
+Asia,Western Asia,Countries,Armenia ,,,ARM
+Asia,Western Asia,Countries,Azerbaijan ,,,AZE
+Asia,Western Asia,Countries,Cyprus ,,,CYP
+Asia,Western Asia,Countries,Georgia ,,,GEO
+Asia,Western Asia,Countries,Iraq ,,,IRQ
+Asia,Western Asia,Countries,Israel ,,,ISR
+Asia,Western Asia,Countries,Jordan ,,,JOR
+Asia,Western Asia,Countries,Kuwait ,,,KWT
+Asia,Western Asia,Countries,Lebanon ,,,LBN
+Asia,Western Asia,Countries,Oman ,,,OMN
+Asia,Western Asia,Countries,Qatar ,,,QAT
+Asia,Western Asia,Countries,Saudi Arabia ,,,SAU
+Asia,Western Asia,Countries,Syrian Arab Republic ,,,SYR
+Asia,Western Asia,Countries,Turkey ,,,TUR
+Asia,Western Asia,Countries,United Arab Emirates ,,,ARE
+Asia,Western Asia,Countries,Yemen ,,,YEM
+Europe,Europe,,,,,europe
+Europe,Eastern Europe,Eastern Europe,,,,easterneurope
+Europe,Eastern Europe,Countries,Belarus ,,,BLR
+Europe,Eastern Europe,Countries,Bulgaria ,,,BGR
+Europe,Eastern Europe,Countries,Czech Republic ,,,CZE
+Europe,Eastern Europe,Countries,Hungary ,,,HUN
+Europe,Eastern Europe,Countries,Poland ,,,POL
+Europe,Eastern Europe,Countries,Moldova,,,MDA
+Europe,Eastern Europe,Countries,Romania ,,,ROU
+Europe,Eastern Europe,Countries,Russian Federation ,,,RUS
+Europe,Eastern Europe,Countries,Slovakia ,,,SVK
+Europe,Eastern Europe,Countries,Ukraine ,,,UKR
+Europe,Northern Europe,Northern Europe,,,,northerneurope
+Europe,Northern Europe,Countries,Denmark ,,,DNK
+Europe,Northern Europe,Countries,Estonia ,,,EST
+Europe,Northern Europe,Countries,Finland ,,,FIN
+Europe,Northern Europe,Countries,Iceland ,,,ISL
+Europe,Northern Europe,Countries,Ireland ,,,IRL
+Europe,Northern Europe,Countries,Latvia ,,,LVA
+Europe,Northern Europe,Countries,Lithuania ,,,LTU
+Europe,Northern Europe,Countries,Norway ,,,NOR
+Europe,Northern Europe,Countries,Sweden ,,,SWE
+Europe,Northern Europe,Countries,United Kingdom,,,GBR
+Europe,Northern Europe,Countries,England,,,ENG
+Europe,Northern Europe,Countries,Scotland,,,SCT
+Europe,Northern Europe,Countries,Wales,,,WLS
+Europe,Northern Europe,Countries,Northern Ireland,,,NIR
+Europe,Southern Europe,Southern Europe,,,,southerneurope
+Europe,Southern Europe,Countries,Albania ,,,ALB
+Europe,Southern Europe,Countries,Bosnia and Herzegovina ,,,BIH
+Europe,Southern Europe,Countries,Croatia ,,,HRV
+Europe,Southern Europe,Countries,Greece ,,,GRC
+Europe,Southern Europe,Countries,Italy ,,,ITA
+Europe,Southern Europe,Countries,Macedonia,,,MKD
+Europe,Southern Europe,Countries,Montenegro ,,,MNE
+Europe,Southern Europe,Countries,Portugal ,,,PRT
+Europe,Southern Europe,Countries,Serbia ,,,SRB
+Europe,Southern Europe,Countries,Slovenia ,,,SVN
+Europe,Southern Europe,Countries,Spain ,,,ESP
+Europe,Western Europe,Western Europe,,,,westerneurope
+Europe,Western Europe,Countries,Austria ,,,AUT
+Europe,Western Europe,Countries,Belgium ,,,BEL
+Europe,Western Europe,Countries,France ,,,FRA
+Europe,Western Europe,Countries,Germany ,,,DEU
+Europe,Western Europe,Countries,Luxembourg ,,,LUX
+Europe,Western Europe,Countries,Netherlands ,,,NLD
+Europe,Western Europe,Countries,Switzerland ,,,CHE
+Oceania,Oceania,,,,,oceaniawoantarctica
+Oceania,Oceania With Antarctica,,,,,oceania
+Oceania,Australia and New Zealand,Australia and New Zealand,,,,australiaandnewzealand
+Oceania,Australia and New Zealand,Countries,Australia ,,,AUS
+Oceania,Australia and New Zealand,Countries,New Zealand ,,,NZL
+Oceania,Australia and New Zealand,Countries,Norfolk Island ,,,NFK
+Oceania,Melanesia,Melanesia,,,,melanesia
+Oceania,Melanesia,Countries,New Caledonia ,,,NCL
+Oceania,Melanesia,Countries,Papua New Guinea ,,,PNG
+Oceania,Melanesia,Countries,Solomon Islands ,,,SLB
+Oceania,Melanesia,Countries,Vanuatu ,,,VUT
+Oceania,Micronesia,Micronesia,,,,micronesia
+Oceania,Micronesia,Countries,Guam ,,,GUM
+Oceania,Micronesia,Countries,Nauru ,,,NRU
+Oceania,Micronesia,Countries,Northern Mariana Islands ,,,MNP
+Oceania,Polynesia,Polynesia,,,,polynesia
+Oceania,Polynesia,Countries,Heard Island and McDonald Islands ,,,HMD
+Oceania,Polynesia,Countries,Niue ,,,NIU
+Oceania,Polynesia,Countries,Samoa ,,,WSM
+Oceania,Polynesia,Countries,Wallis and Futuna ,,,WLF

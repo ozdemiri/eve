@@ -1,0 +1,1 @@
+{"type":"Topology","transform":{"scale":[0.0011034996711540165,0.0011577588934542386],"translate":[-62.23013261582753,16.727609304778326]},"arcs":[[[37,75],[38,-61],[-75,-14],[37,75]]],"objects":{"MSR.geo":{"type":"GeometryCollection","geometries":[{"arcs":[[0]],"type":"Polygon","properties":{"name":"Montserrat","postal":null},"id":"MSR"}]}}}

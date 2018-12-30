@@ -1,0 +1,1 @@
+{"type":"Topology","transform":{"scale":[0.00042152897106035426,0.0004955797493350894],"translate":[166.91342287713033,-0.5475394591411339]},"arcs":[[[90,17],[-83,-17],[-7,96],[100,4],[-10,-83]]],"objects":{"NRU.geo":{"type":"GeometryCollection","geometries":[{"arcs":[[0]],"type":"Polygon","properties":{"name":"Nauru","postal":null},"id":"NRU"}]}}}
